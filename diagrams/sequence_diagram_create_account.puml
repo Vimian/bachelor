@@ -1,0 +1,39 @@
+@startuml
+
+skinparam classAttributeIconSize 0
+
+participant "Client" as cln1
+participant "Gateway" as gtw1
+participant "Account" as acc1
+participant "Message Broker" as msb1
+
+activate cln1
+cln1 -> gtw1 : create account
+activate gtw1
+gtw1 -> acc1 : create account
+activate acc1
+acc1 -> acc1 : creates an account
+
+alt account created successfully
+        acc1 ->> msb1 : publish account
+        activate msb1
+        msb1 -> msb1 : broadcast account
+        activate msb1
+        deactivate msb1
+        deactivate msb1
+end
+
+acc1 -->> gtw1 : response
+deactivate acc1
+gtw1 -->> cln1 : response
+deactivate gtw1
+
+alt account created successfully
+        cln1 -> cln1 : display success
+else account creation failed
+        cln1 -> cln1 : display error
+end
+
+deactivate cln1
+
+@enduml

@@ -1,0 +1,36 @@
+@startuml
+
+skinparam classAttributeIconSize 0
+
+participant "Client" as cln1
+participant "Gateway" as gtw1
+participant "Transaction" as trn1
+queue "Queue" as que1
+
+' Client sends a request to the Gateway
+activate cln1
+cln1 -> gtw1 : post transaction
+activate gtw1
+gtw1 -> trn1 : post transaction
+activate trn1
+trn1 -> que1 : enqueue transaction
+activate que1
+
+' Client gets response if the transaction was queued
+que1 -->> trn1 : response
+deactivate que1
+trn1 -->> gtw1 : response
+deactivate trn1
+gtw1 -->> cln1 : response
+deactivate gtw1
+
+' Client displays the response to the user
+alt transaction successfully queued
+        cln1 -> cln1 : display success
+else transaction failed to queue
+        cln1 -> cln1 : display error
+end
+
+deactivate cln1
+
+@enduml

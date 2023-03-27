@@ -1,0 +1,32 @@
+@startuml
+
+skinparam classAttributeIconSize 0
+
+participant "Client" as cln1
+participant "Gateway" as gtw1
+participant "Scheduled Transaction" as sct1
+
+' Client sends a request to the Gateway
+activate cln1
+cln1 -> gtw1 : post transaction
+activate gtw1
+gtw1 -> sct1 : post transaction
+activate sct1
+sct1 -> sct1 : log transaction
+
+' Client gets response if the transaction was queued
+sct1 -->> gtw1 : response
+deactivate sct1
+gtw1 -->> cln1 : response
+deactivate gtw1
+
+' Client displays the response to the user
+alt scheduled transaction successfully created
+        cln1 -> cln1 : display success
+else scheduled transaction creation failed
+        cln1 -> cln1 : display error
+end
+
+deactivate cln1
+
+@enduml

@@ -1,0 +1,21 @@
+@startuml
+
+skinparam classAttributeIconSize 0
+
+participant "Client" as cln1
+participant "Gateway" as gtw1
+participant "Account" as acc1
+
+activate cln1
+cln1 -> gtw1 : get balance
+activate gtw1
+gtw1 -> acc1 : get balance
+activate acc1
+acc1 -> acc1 : lookup balance
+acc1 -->> gtw1 : balance
+deactivate acc1
+gtw1 -->> cln1 : balance
+deactivate gtw1
+cln1 -> cln1 : display balance
+
+@enduml

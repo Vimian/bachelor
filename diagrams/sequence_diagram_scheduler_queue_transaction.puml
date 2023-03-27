@@ -1,0 +1,30 @@
+@startuml
+
+skinparam classAttributeIconSize 0
+
+participant "Scheduled Transaction" as sct1
+participant "Transaction" as trn1
+queue "Queue" as que1
+
+
+loop for each scheduled transaction
+        ' Client sends a request to the Gateway
+        activate sct1
+        sct1 -> trn1 : post transaction
+        activate trn1
+        trn1 -> que1 : enqueue transaction
+        activate que1
+
+        ' Client gets response if the transaction was queued
+        que1 -->> trn1 : response
+        deactivate que1
+        trn1 -->> sct1 : response
+        deactivate trn1
+
+        ' Client displays the response to the user
+        alt transaction was queued
+                sct1 -> sct1 : update transaction last\nqueued time
+        end
+end
+
+@enduml

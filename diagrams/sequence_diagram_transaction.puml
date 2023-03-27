@@ -1,0 +1,72 @@
+@startuml
+
+skinparam classAttributeIconSize 0
+
+queue "Queue" as que1
+participant "Transaction Orchestrator" as tro1
+participant "Transaction History" as trh1
+participant "Account" as acc1
+participant "External Bank Gateway" as ebg1
+
+' Queue notifies the Transaction Orchestrator of a new transaction
+activate que1
+que1 ->> tro1 : new transaction event
+deactivate que1
+activate tro1
+
+' Transaction Orchestrator pops the transaction from the queue
+tro1 -> que1 : pop transaction
+activate que1
+que1 -->> tro1 : response
+deactivate que1
+
+' Transaction Orchestrator processes the transaction
+tro1 -> trh1 : log transaction history
+activate trh1
+trh1 -> trh1 : log transaction
+
+' Transaction Orchestrator updates the account
+tro1 -> acc1 : update Account
+activate acc1
+acc1 -> acc1 : update Account
+
+
+alt transaction to internal account
+        tro1 -> acc1 : update Account
+        activate acc1
+        acc1 -> acc1 : update Account
+        acc1 -->> tro1 : response
+        deactivate acc1
+end
+
+trh1 -->> tro1 : response
+acc1 -->> tro1 : response
+deactivate trh1
+deactivate acc1
+
+' Transaction Orchestrator sends the transaction to the external bank
+alt internal processing successful and transaction is to external account
+        tro1 -> ebg1 : request
+        activate ebg1
+        ebg1 -->> tro1 : response
+        deactivate ebg1
+end
+
+alt transaction failed
+        tro1 -> trh1 : undo
+        activate trh1
+        tro1 -> acc1 : undo
+        activate acc1
+        trh1 -> trh1 : change status
+        acc1 -> acc1 : revert account
+
+        trh1 -->> tro1 : response
+        acc1 -->> tro1 : response
+        deactivate trh1
+end
+
+
+
+deactivate tro1
+
+@enduml
