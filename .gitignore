@@ -13,3 +13,6 @@
 
 # Dependency directories
 vendor/
+
+# Development files
+**/docker-compose.override.yml

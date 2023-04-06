@@ -6,7 +6,7 @@ import (
 	"gopkg.in/yaml.v3"
 )
 
-func LoadConfig(env string, config []byte, configuration interface{}) (interface{}, error) {
+func LoadConfig(config []byte, configuration interface{}) (interface{}, error) {
 	// unmarshal the config file
 	err := yaml.Unmarshal(config, configuration)
 	if err != nil {
