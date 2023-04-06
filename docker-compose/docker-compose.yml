@@ -1,3 +1,31 @@
 version: "3.8"
 
 services:
+  user:
+    image: bachelor/user
+    restart: unless-stopped
+    build:
+      context: ${docker_compose_path_offset_to_root}
+      dockerfile: /cmd/user/Dockerfile
+      args:
+        - GO_VERSION=${go_version}
+        - service_path=cmd/user
+    #ports:
+    #  - "8080:8080"
+    depends_on:
+      - user-db
+
+  user-db:
+    image: postgres:15.2
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${user_db_user}
+      POSTGRES_PASSWORD: ${user_db_password}
+      POSTGRES_DB: ${user_db_name}
+    #ports:
+    #  - "5432:5432"
+    volumes:
+      - user_db_data:/var/lib/mysql
+
+volumes:
+  user_db_data:
