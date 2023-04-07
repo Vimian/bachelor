@@ -1,6 +1,8 @@
 package account
 
-import "github.com/google/uuid"
+import (
+	"github.com/google/uuid"
+)
 
 type Accounts struct {
 	OwnerID  uuid.UUID `json:"ownerid" binding:"required"`
