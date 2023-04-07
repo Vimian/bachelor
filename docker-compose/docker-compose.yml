@@ -27,5 +27,32 @@ services:
     volumes:
       - user_db_data:/var/lib/mysql
 
+  account:
+    image: bachelor/account
+    restart: unless-stopped
+    build:
+      context: ${docker_compose_path_offset_to_root}
+      dockerfile: /cmd/account/Dockerfile
+      args:
+        - GO_VERSION=${go_version}
+        - service_path=cmd/account
+    #ports:
+    #  - "8080:8080"
+    depends_on:
+      - account-db
+
+  account-db:
+    image: postgres:15.2
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${account_db_user}
+      POSTGRES_PASSWORD: ${account_db_password}
+      POSTGRES_DB: ${account_db_name}
+    #ports:
+    #  - "5432:5432"
+    volumes:
+      - account_db_data:/var/lib/mysql
+
 volumes:
   user_db_data:
+  account_db_data:

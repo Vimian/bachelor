@@ -6,9 +6,9 @@ import (
 
 type Account struct {
 	ID              uuid.UUID `json:"id"`
-	Name            string    `json:"name" binding:"required"`
+	Name            string    `json:"name"`
 	OwnerID         uuid.UUID `json:"ownerid" binding:"required"`
-	Balance         string    `json:"balance"`
-	OverdrawLimit   string    `json:"overdrawlimit"`
-	CreateTimestamp string    `json:"createtimestamp"`
+	Balance         int64     `json:"balance"`
+	OverdrawLimit   int64     `json:"overdrawlimit"`
+	CreateTimestamp int64     `json:"createtimestamp"`
 }
