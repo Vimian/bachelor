@@ -1,6 +1,8 @@
 package transaction
 
-import "github.com/google/uuid"
+import (
+	"github.com/google/uuid"
+)
 
 type Transaction struct {
 	ID                uuid.UUID `json:"id"`

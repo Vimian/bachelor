@@ -8,6 +8,6 @@ import (
 type ScheduledTransaction struct {
 	ID           uuid.UUID               `json:"id"`
 	Transaction  transaction.Transaction `json:"transaction" binding:"required"`
-	ExecutionDay int                     `json:"executiontime" binding:"required"`
+	ExecutionDay int32                   `json:"executiontime" binding:"required"`
 	IsContenious bool                    `json:"iscontenious"`
 }
