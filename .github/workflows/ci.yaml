@@ -47,3 +47,14 @@ jobs:
           build-args: |
             GO_VERSION=${{ env.go_version }}
             service_path=cmd/${{ matrix.services }}
+
+      - name: Save Docker image to file
+        run: |
+          mkdir -p ./docker-images
+          docker save local/${{ matrix.services }}:latest > ./docker-images/${{ matrix.services }}.tar
+
+      - name: Upload Docker image
+        uses: actions/upload-artifact@v3
+        with:
+          name: ${{ matrix.services }}-docker-image
+          path: ./docker-images/${{ matrix.services }}.tar
