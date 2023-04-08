@@ -45,5 +45,5 @@ jobs:
           load: true
           tags: local/${{ matrix.services }}:latest
           build-args: |
-            GO_VERSION=${{ env.GO_VERSION }}
+            GO_VERSION=${{ env.go_version }}
             service_path=cmd/${{ matrix.services }}
