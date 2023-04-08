@@ -39,7 +39,7 @@ jobs:
       - name: Build Docker image
         uses: docker/build-push-action@v4
         with:
-          context: ${{ env.docker_compose_path_offset_to_root }}
+          context: .
           file: ./cmd/${{ matrix.services }}/Dockerfile
           push: false
           load: true
