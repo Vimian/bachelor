@@ -39,11 +39,11 @@ jobs:
       - name: Build Docker image
         uses: docker/build-push-action@v4
         with:
-          context: ./cmd/${{ matrix.service }}
-          file: ./cmd/${{ matrix.service }}/Dockerfile
+          context: ./cmd/${{ matrix.services }}
+          file: ./cmd/${{ matrix.services }}/Dockerfile
           push: false
           load: true
-          tags: local/${{ matrix.service }}:latest
+          tags: local/${{ matrix.services }}:latest
           build-args: |
             GO_VERSION=${{ env.GO_VERSION }}
-            service_path=cmd/${{ matrix.service }}
+            service_path=cmd/${{ matrix.services }}
