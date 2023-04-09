@@ -11,7 +11,7 @@ func (h *Handler) GetTypes(c *gin.Context) {
 	// Get types from repository
 	types, err := h.repo.GetTypes()
 	if err != nil {
-		log.Printf("Failed to get types from repository. error: %s", err.Error())
+		log.Printf("failed to get types from repository. error: %s", err.Error())
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}

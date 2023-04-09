@@ -32,7 +32,7 @@ func (h *Handler) CreateTransactionHistory(c *gin.Context) {
 
 	// Create transaction history in repository
 	if err := h.repo.Create(&transactionHistory); err != nil {
-		log.Printf("Failed to create transaction history in repository. {id: %s, transaction.id: %s}, error: %s", transactionHistory.ID, transactionHistory.Transaction.ID, err.Error())
+		log.Printf("failed to create transaction history in repository. {id: %s, transaction.id: %s}, error: %s", transactionHistory.ID, transactionHistory.Transaction.ID, err.Error())
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}

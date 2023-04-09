@@ -14,7 +14,7 @@ func (h *Handler) GetTransactionHistoryStatusByTransactionID(c *gin.Context) {
 	// Get transaction history status from repository
 	status, err := h.repo.GetStatusByTransactionID(transactionID)
 	if err != nil {
-		log.Printf("Failed to get status of transaction history by transaction id from repository. {id: %s}, error: %s", transactionID, err.Error())
+		log.Printf("failed to get status of transaction history by transaction id from repository. {id: %s}, error: %s", transactionID, err.Error())
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}

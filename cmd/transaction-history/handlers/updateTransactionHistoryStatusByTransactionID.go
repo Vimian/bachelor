@@ -25,7 +25,7 @@ func (h *Handler) UpdateTransactionHistoryStatusByTransactionID(c *gin.Context) 
 	var err error = nil
 	status.TransactionID, err = uuid.Parse(transactionID)
 	if err != nil {
-		log.Printf("Failed to parse transaction id. {transactionid: %s}, error: %s", transactionID, err.Error())
+		log.Printf("failed to parse transaction id. {transactionid: %s}, error: %s", transactionID, err.Error())
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
@@ -33,7 +33,7 @@ func (h *Handler) UpdateTransactionHistoryStatusByTransactionID(c *gin.Context) 
 	// Update transaction history status in repository
 	err = h.repo.UpdateStatusByTransactionID(&status, time.Now().UTC().Unix())
 	if err != nil {
-		log.Printf("Failed to update status of transaction history in repository. {transactionid: %s}, error: %s", transactionID, err.Error())
+		log.Printf("failed to update status of transaction history in repository. {transactionid: %s}, error: %s", transactionID, err.Error())
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
