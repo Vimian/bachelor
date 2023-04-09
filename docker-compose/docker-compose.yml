@@ -53,6 +53,33 @@ services:
     volumes:
       - account_db_data:/var/lib/mysql
 
+  transaction-history:
+    image: bachelor/transaction-history
+    restart: unless-stopped
+    build:
+      context: ${docker_compose_path_offset_to_root}
+      dockerfile: /cmd/transaction-history/Dockerfile
+      args:
+        - GO_VERSION=${go_version}
+        - service_path=cmd/transaction-history
+    #ports:
+    #  - "8080:8080"
+    depends_on:
+      - transaction-history-db
+
+  transaction-history-db:
+    image: postgres:15.2
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${transaction_history_db_user}
+      POSTGRES_PASSWORD: ${transaction_history_db_password}
+      POSTGRES_DB: ${transaction_history_db_name}
+    #ports:
+    #  - "5432:5432"
+    volumes:
+      - transaction_history_db_data:/var/lib/mysql
+
 volumes:
   user_db_data:
   account_db_data:
+  transaction_history_db_data:

@@ -5,6 +5,7 @@ import (
 )
 
 type Status struct {
-	TransactionID uuid.UUID `json:"id" binding:"required"`
+	ID            uuid.UUID `json:"id"`
+	TransactionID uuid.UUID `json:"transaction_id"`
 	Status        int32     `json:"status" binding:"required"`
 }
