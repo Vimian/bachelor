@@ -79,7 +79,31 @@ services:
     volumes:
       - transaction_history_db_data:/var/lib/mysql
 
+  transaction:
+    image: bachelor/transaction
+    restart: unless-stopped
+    build:
+      context: ${docker_compose_path_offset_to_root}
+      dockerfile: /cmd/transaction/Dockerfile
+      args:
+        - GO_VERSION=${go_version}
+        - service_path=cmd/transaction
+    #ports:
+    #  - "8080:8080"
+    depends_on:
+      - transaction-queue
+
+  transaction-queue:
+    image: rabbitmq:3.11.13-management
+    restart: unless-stopped
+    #ports:
+    #  - "5672:5672"
+    #  - "15672:15672"
+    volumes:
+      - transaction_queue_data:/var/lib/rabbitmq
+
 volumes:
   user_db_data:
   account_db_data:
   transaction_history_db_data:
+  transaction_queue_data:
