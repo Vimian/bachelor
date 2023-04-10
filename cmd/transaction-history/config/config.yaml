@@ -1,0 +1,12 @@
+server:
+  host: 0.0.0.0
+  port: 8080
+database:
+  host: transaction-history-db
+  port: 5432
+  user: root
+  password: password
+  name: transaction-history
+  sslmode: disable
+defaultstatus: 0
+defaulttype: 0
