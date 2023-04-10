@@ -1,0 +1,60 @@
+# Continuous Integration workflow for GitHub Actions
+name: continuous-integration
+
+# When to run the workflow
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+    branches:
+      - master
+
+# Jobs to run
+jobs:
+  # Build services with Docker
+  build-docker-files:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        # Define the services
+        services:
+          - user
+          - account
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Load .env file
+        uses: cardinalby/export-env-action@v2
+        with:
+          envFile: docker-compose/.env
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v2
+
+      # (Sign in to Docker Hub here)
+
+      # (Add push to docker hub here)
+      - name: Build Docker image
+        uses: docker/build-push-action@v4
+        with:
+          context: .
+          file: ./cmd/${{ matrix.services }}/Dockerfile
+          push: false
+          load: true
+          tags: local/${{ matrix.services }}:latest
+          build-args: |
+            GO_VERSION=${{ env.go_version }}
+            service_path=cmd/${{ matrix.services }}
+
+      - name: Save Docker image to file
+        run: |
+          mkdir -p ./docker-images
+          docker save local/${{ matrix.services }}:latest > ./docker-images/${{ matrix.services }}.tar
+
+      - name: Upload Docker image
+        uses: actions/upload-artifact@v3
+        with:
+          name: ${{ matrix.services }}-docker-image
+          path: ./docker-images/${{ matrix.services }}.tar
