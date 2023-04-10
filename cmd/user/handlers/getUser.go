@@ -14,7 +14,7 @@ func (h *Handler) GetUser(c *gin.Context) {
 	// Get user from repository
 	user, err := h.repo.Get(id)
 	if err != nil {
-		log.Printf("Failed to get user from repository. {id: %s}, error: %s", id, err.Error())
+		log.Printf("failed to get user from repository. {id: %s}, error: %s", id, err.Error())
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}

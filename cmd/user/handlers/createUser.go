@@ -24,7 +24,7 @@ func (h *Handler) CreateUser(c *gin.Context) {
 
 	// Create user in repository
 	if err := h.repo.Create(&user); err != nil {
-		log.Printf("Failed to create user in repository. {username: %s}, error: %s", user.Username, err.Error())
+		log.Printf("failed to create user in repository. {username: %s}, error: %s", user.Username, err.Error())
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}

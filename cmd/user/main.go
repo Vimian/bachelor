@@ -45,6 +45,6 @@ func main() {
 
 	// Start HTTP server
 	var address string = conf.Server.Host + ":" + fmt.Sprint(conf.Server.Port)
-	log.Printf("Starting user service on: %s", address)
+	log.Printf("starting user service on: %s", address)
 	log.Fatalf("server exited with error: %s", http.ListenAndServe(address, router).Error())
 }
