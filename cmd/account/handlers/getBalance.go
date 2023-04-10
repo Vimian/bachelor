@@ -14,7 +14,7 @@ func (h *Handler) GetBalance(c *gin.Context) {
 	// Get balance from repository
 	balance, err := h.repo.GetBalance(id)
 	if err != nil {
-		log.Printf("Failed to get balance of account from repository. {account.id: %s}, error: %s", id, err.Error())
+		log.Printf("failed to get balance of account from repository. {account.id: %s}, error: %s", id, err.Error())
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
