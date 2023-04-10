@@ -22,7 +22,7 @@ func (h *Handler) UpdateBalance(c *gin.Context) {
 	// Get account from repository
 	account, err := h.repo.Get(id)
 	if err != nil {
-		log.Printf("Failed to get account from repository. {account.id: %s}, error: %s", id, err.Error())
+		log.Printf("failed to get account from repository. {account.id: %s}, error: %s", id, err.Error())
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
@@ -32,7 +32,7 @@ func (h *Handler) UpdateBalance(c *gin.Context) {
 
 	// Check if account is overdrawn
 	if account.Balance < account.OverdrawLimit {
-		log.Printf("Account is overdrawn. {account.id: %s}", id)
+		log.Printf("account is overdrawn. {account.id: %s}", id)
 		c.JSON(http.StatusBadRequest, gin.H{"error": "account can't be overdrawn beyond overdraw limit"})
 		return
 	}
@@ -46,7 +46,7 @@ func (h *Handler) UpdateBalance(c *gin.Context) {
 	// Update balance in repository
 	err = h.repo.UpdateBalance(balance)
 	if err != nil {
-		log.Printf("Failed to update balance of account in repository. {account.id: %s}, error: %s", id, err.Error())
+		log.Printf("failed to update balance of account in repository. {account.id: %s}, error: %s", id, err.Error())
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}

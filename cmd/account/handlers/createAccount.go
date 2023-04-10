@@ -35,7 +35,7 @@ func (h *Handler) CreateAccount(c *gin.Context) {
 
 	// Create account in repository
 	if err := h.repo.Create(&account); err != nil {
-		log.Printf("Failed to create account in repository. {id: %s, owner.id: %s, name: %s}, error: %s", account.ID, account.OwnerID, account.Name, err.Error())
+		log.Printf("failed to create account in repository. {id: %s, owner.id: %s, name: %s}, error: %s", account.ID, account.OwnerID, account.Name, err.Error())
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}

@@ -51,6 +51,6 @@ func main() {
 
 	// Start HTTP server
 	var address string = conf.Server.Host + ":" + fmt.Sprint(conf.Server.Port)
-	log.Printf("starting account service on: %s", address)
+	log.Printf("starting transaction history service on: %s", address)
 	log.Fatalf("server exited with error: %s", http.ListenAndServe(address, router).Error())
 }

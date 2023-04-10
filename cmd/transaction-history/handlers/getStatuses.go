@@ -11,7 +11,7 @@ func (h *Handler) GetStatuses(c *gin.Context) {
 	// Get statuses from repository
 	statuses, err := h.repo.GetStatuses()
 	if err != nil {
-		log.Printf("Failed to get statuses from repository. error: %s", err.Error())
+		log.Printf("failed to get statuses from repository. error: %s", err.Error())
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}

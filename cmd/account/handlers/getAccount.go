@@ -14,7 +14,7 @@ func (h *Handler) GetAccount(c *gin.Context) {
 	// Get account from repository
 	account, err := h.repo.Get(id)
 	if err != nil {
-		log.Printf("Failed to get account from repository. {id: %s}, error: %s", id, err.Error())
+		log.Printf("failed to get account from repository. {id: %s}, error: %s", id, err.Error())
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
