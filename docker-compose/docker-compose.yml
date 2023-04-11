@@ -102,6 +102,26 @@ services:
     volumes:
       - transaction_queue_data:/var/lib/rabbitmq
 
+  transaction-orchestrator:
+    image: bachelor/transaction-orchestrator
+    restart: unless-stopped
+    build:
+      context: ${docker_compose_path_offset_to_root}
+      dockerfile: /cmd/transaction-orchestrator/Dockerfile
+      args:
+        - GO_VERSION=${go_version}
+        - service_path=cmd/transaction-orchestrator
+    #ports:
+    #  - "8080:8080"
+    depends_on:
+      - transaction-queue
+
+  transaction-orchestrator-cache:
+    image: redis:7.0.10
+    restart: unless-stopped
+    #ports:
+    #  - "6379:6379"
+
 volumes:
   user_db_data:
   account_db_data:
