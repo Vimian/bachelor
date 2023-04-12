@@ -37,7 +37,8 @@ func migrate(tx *sql.Tx) error {
 			amount BIGINT NOT NULL,
 			starttimestamp BIGINT NOT NULL,
 			endtimestamp BIGINT,
-			status INT NOT NULL REFERENCES statuses(id)
+			status INT NOT NULL REFERENCES statuses(id),
+			type INT NOT NULL REFERENCES types(id)
 		);
 	`)
 

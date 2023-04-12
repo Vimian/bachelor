@@ -2,6 +2,7 @@ package cache
 
 import (
 	"fmt"
+	"time"
 
 	"github.com/casperfj/bachelor/cmd/transaction-orchestrator/config"
 	"github.com/go-redis/redis/v8"
@@ -36,17 +37,26 @@ func NewCache(conf *config.Configuration) (*Cache, error) {
 
 func (c *Cache) BlockAccountIDs(accountIDs []uuid.UUID) error {
 	var err error = nil
+	var i int
 
 	// Insert account IDs into cache
-	for _, accountID := range accountIDs {
-		newErr := c.redisClient.Set(c.redisClient.Context(), accountID.String(), true, 0).Err()
+	for i = 0; i < len(accountIDs); i++ {
+		setIfNotExist, newErr := c.redisClient.SetNX(c.redisClient.Context(), accountIDs[i].String(), time.Now().UTC().Unix(), 0).Result()
 		if newErr != nil {
 			err = newErr
+			break
+		}
+
+		// Skip the rest of the account IDs if error or an account was already in the cache
+		if !setIfNotExist {
+			err = fmt.Errorf("account ID %s is already in the cache", accountIDs[i].String())
+			break
 		}
 	}
 
+	// Release account IDs that were successfully inserted into the cache if error or an account was already in the cache
 	if err != nil {
-		c.ReleaseAccountIDs(accountIDs)
+		c.ReleaseAccountIDs(accountIDs[:i])
 	}
 
 	// Return error

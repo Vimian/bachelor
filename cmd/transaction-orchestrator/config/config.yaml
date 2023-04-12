@@ -17,9 +17,10 @@ transactionhistoryservice:
   pathupdatestatuspart1: /status
   statuscompleted: 1
   statusfailed: 2
+  typefailure: 1
 accountservice:
   host: account
   port: 8080
   pathpart0: /account
   pathpart1: /balance
-failureaccountid: "00000000-0000-0000-0000-000000000000"
+  failureaccountid: "00000000-0000-0000-0000-000000000001"

@@ -29,14 +29,14 @@ type Configuration struct {
 		PathUpdateStatusPart1 string `yaml:"pathupdatestatuspart1"`
 		StatusCompleted       int32  `yaml:"statuscompleted"`
 		StatusFailed          int32  `yaml:"statusfailed"`
+		TypeFailure           int32  `yaml:"typefailure"`
 	} `yaml:"transactionhistoryservice"`
 
 	AccountService struct {
-		Host      string `yaml:"host"`
-		Port      int    `yaml:"port"`
-		PathPart0 string `yaml:"pathpart0"`
-		PathPart1 string `yaml:"pathpart1"`
+		Host             string    `yaml:"host"`
+		Port             int       `yaml:"port"`
+		PathPart0        string    `yaml:"pathpart0"`
+		PathPart1        string    `yaml:"pathpart1"`
+		FailureAccountID uuid.UUID `yaml:"failureaccountid"`
 	} `yaml:"accountservice"`
-
-	FailureAccountID uuid.UUID `yaml:"failureaccountid"`
 }

@@ -17,29 +17,44 @@ import (
 	"github.com/google/uuid"
 )
 
+type task struct {
+	ID    int32
+	Error error
+}
+
 func (h *Handler) ProcessTransaction(transaction *transaction.Transaction, configuration *config.Configuration) {
+	// Create transaction-history
+	transactionHistory := &transactionhistory.TransactionHistory{
+		Transaction: *transaction,
+	}
 
 	// TODO: Check if transaction is to external account
 
+	// Check if eather sender or receiver is failure account
+	if transaction.SenderAccountID == configuration.AccountService.FailureAccountID || transaction.ReceiverAccountID == configuration.AccountService.FailureAccountID {
+		// Set transaction history type to correction
+		transactionHistory.Type = configuration.TransactionHistoryService.TypeFailure
+	}
+
 	// Do transaction
-	errChan := doTransaction(transaction, configuration)
+	errChan := doTransaction(transactionHistory, configuration)
 
 	// Check if any of the requests failed
 	// TODO: Handle errors
 	var failures []bool = make([]bool, 3)
 
-	for i := 0; i < 3; i++ {
-		newErr := <-errChan
-		if newErr != nil {
+	for i := 0; i < len(failures); i++ {
+		aTask := <-errChan
+		if aTask.Error != nil {
 			// TODO: Handle error
-			log.Printf("error: %s", newErr.Error())
-			failures[i] = true
+			log.Printf("%d error: %s", i, aTask.Error.Error())
+			failures[aTask.ID] = true
 		}
 	}
 
 	if failures[0] == false && failures[1] == false && failures[2] == false {
 		// Update transaction history status to completed
-		err := updateTransactionHistoryStatus(transaction.ID, configuration.TransactionHistoryService.StatusCompleted, configuration)
+		err := updateTransactionHistoryStatus(transactionHistory.Transaction.ID, configuration.TransactionHistoryService.StatusCompleted, configuration)
 		if err != nil {
 			// TODO: Handle error
 		}
@@ -49,28 +64,28 @@ func (h *Handler) ProcessTransaction(transaction *transaction.Transaction, confi
 	}
 
 	// Undo transaction if any of the requests failed
-	undoTransaction(transaction, configuration, failures)
+	undoTransaction(transactionHistory, configuration, failures)
 
 	// TODO: Return error
 	return
 }
 
-func doTransaction(transaction *transaction.Transaction, configuration *config.Configuration) <-chan error {
+func doTransaction(transactionHistory *transactionhistory.TransactionHistory, configuration *config.Configuration) <-chan task {
 	// Send requests to account and transaction-history
-	errChan := make(chan error, 3)
+	errChan := make(chan task, 3)
 	var wg sync.WaitGroup
 	wg.Add(3)
 
 	go func() {
-		errChan <- updateBalance(transaction.SenderAccountID, transaction.Amount*-1, configuration)
+		errChan <- task{0, updateBalance(transactionHistory.Transaction.SenderAccountID, transactionHistory.Transaction.Amount*-1, configuration)}
 		wg.Done()
 	}()
 	go func() {
-		errChan <- updateBalance(transaction.ReceiverAccountID, transaction.Amount, configuration)
+		errChan <- task{1, updateBalance(transactionHistory.Transaction.ReceiverAccountID, transactionHistory.Transaction.Amount, configuration)}
 		wg.Done()
 	}()
 	go func() {
-		errChan <- createTransactionHistory(transaction, configuration)
+		errChan <- task{2, createTransactionHistory(transactionHistory, configuration)}
 		wg.Done()
 	}()
 
@@ -81,7 +96,7 @@ func doTransaction(transaction *transaction.Transaction, configuration *config.C
 	return errChan
 }
 
-func undoTransaction(transaction *transaction.Transaction, configuration *config.Configuration, failures []bool) <-chan error {
+func undoTransaction(transactionHistory *transactionhistory.TransactionHistory, configuration *config.Configuration, failures []bool) <-chan error {
 	// Send requests to those services that did not fail
 	errChan := make(chan error, 3)
 	var wg sync.WaitGroup
@@ -91,7 +106,7 @@ func undoTransaction(transaction *transaction.Transaction, configuration *config
 		// Check if updateBalance failed
 		if failures[0] == false {
 			// Revert changes to balance
-			errChan <- updateBalance(transaction.SenderAccountID, transaction.Amount, configuration)
+			errChan <- updateBalance(transactionHistory.Transaction.SenderAccountID, transactionHistory.Transaction.Amount, configuration)
 		}
 		wg.Done()
 	}()
@@ -99,7 +114,7 @@ func undoTransaction(transaction *transaction.Transaction, configuration *config
 		// Check if updateBalance failed
 		if failures[1] == false {
 			// Revert changes to balance
-			errChan <- updateBalance(transaction.ReceiverAccountID, transaction.Amount*-1, configuration)
+			errChan <- updateBalance(transactionHistory.Transaction.ReceiverAccountID, transactionHistory.Transaction.Amount*-1, configuration)
 		}
 		wg.Done()
 	}()
@@ -107,7 +122,7 @@ func undoTransaction(transaction *transaction.Transaction, configuration *config
 		// Check if createTransactionHistory failed
 		if failures[2] == false {
 			// Update transaction history status to failed
-			errChan <- updateTransactionHistoryStatus(transaction.ID, configuration.TransactionHistoryService.StatusFailed, configuration)
+			errChan <- updateTransactionHistoryStatus(transactionHistory.Transaction.ID, configuration.TransactionHistoryService.StatusFailed, configuration)
 		}
 		wg.Done()
 	}()
@@ -119,11 +134,8 @@ func undoTransaction(transaction *transaction.Transaction, configuration *config
 	return errChan
 }
 
-func createTransactionHistory(transaction *transaction.Transaction, configuration *config.Configuration) error {
-	// Create transaction-history
-	transactionHistory := &transactionhistory.TransactionHistory{
-		Transaction: *transaction,
-	}
+func createTransactionHistory(transactionHistory *transactionhistory.TransactionHistory, configuration *config.Configuration) error {
+	// Marshal transactionHistory to json
 	body, err := json.Marshal(transactionHistory)
 	if err != nil {
 		return err

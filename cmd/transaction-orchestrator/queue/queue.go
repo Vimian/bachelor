@@ -89,16 +89,8 @@ func (q *Queue) SubscribeToTransaction(handlers *handlers.Handlers, cache *cache
 
 			accountIDs := []uuid.UUID{transaction.SenderAccountID, transaction.ReceiverAccountID}
 
-			// Check if eather account is in other transaction
-			// TODO: Handle error
-			if isBlocked, err := cache.IsInTransaction(accountIDs); isBlocked || err != nil {
-				log.Printf("account is in other transaction. transaction: %s", transaction.ID)
-				// Requeue message
-				d.Nack(false, true)
-				continue
-			}
-
 			// Add account ids to cache
+			// TODO: Handle error
 			err := cache.BlockAccountIDs(accountIDs)
 			if err != nil {
 				log.Printf("failed to add account ids to cache. transaction: %s, error: %s", transaction.ID, err.Error())

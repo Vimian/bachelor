@@ -27,9 +27,6 @@ func (h *Handler) CreateTransactionHistory(c *gin.Context) {
 	// Add default status to transaction history
 	transactionHistory.Status = h.conf.DefaultStatus
 
-	// Add default type to transaction history
-	transactionHistory.Type = h.conf.DefaultType
-
 	// Create transaction history in repository
 	if err := h.repo.Create(&transactionHistory); err != nil {
 		log.Printf("failed to create transaction history in repository. {id: %s, transaction.id: %s}, error: %s", transactionHistory.ID, transactionHistory.Transaction.ID, err.Error())
