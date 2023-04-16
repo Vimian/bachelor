@@ -60,7 +60,7 @@ func (r *Repository) RunWithTransaction(fn func(tx *sql.Tx) error) error {
 
 func (r *Repository) Create(transactionHistory *transactionhistory.TransactionHistory) error {
 	// Prepare query
-	stmt, err := r.db.Prepare("INSERT INTO transactionhistories (id, transactionid, senderaccountid, receiveraccountid, amount, starttimestamp, endtimestamp, status) VALUES ($1, $2, $3, $4, $5, $6, $7, $8)")
+	stmt, err := r.db.Prepare("INSERT INTO transactionhistories (id, transactionid, senderaccountid, receiveraccountid, amount, starttimestamp, endtimestamp, status, type) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)")
 	if err != nil {
 		return err
 	}
@@ -76,6 +76,7 @@ func (r *Repository) Create(transactionHistory *transactionhistory.TransactionHi
 		transactionHistory.StartTimestamp,
 		transactionHistory.EndTimestamp,
 		transactionHistory.Status,
+		transactionHistory.Type,
 	)
 	if err != nil {
 		return err

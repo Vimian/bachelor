@@ -23,6 +23,7 @@ jobs:
           - account
           - transaction-history
           - transaction
+          - transaction-orchestrator
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
