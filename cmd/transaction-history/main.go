@@ -43,9 +43,9 @@ func main() {
 	router.POST("/transaction-history/", handler.CreateTransactionHistory)
 	router.GET("/transaction-history/:id", handler.GetTransactionHistory)
 	router.GET("/transaction-history/:id/status/", handler.GetTransactionHistoryStatus)
+	router.GET("/transaction-history/transaction/:transactionid/status/", handler.GetTransactionHistoryStatusByTransactionID)
+	router.PUT("/transaction-history/transaction/:transactionid/status/", handler.UpdateTransactionHistoryStatusByTransactionID)
 	router.GET("/transaction-histories/:accountid", handler.GetTransactionHistories)
-	router.GET("/transaction/:transactionid/status/", handler.GetTransactionHistoryStatusByTransactionID)
-	router.PUT("/transaction/:transactionid/status/", handler.UpdateTransactionHistoryStatusByTransactionID)
 	router.GET("/statuses/", handler.GetStatuses)
 	router.GET("/types/", handler.GetTypes)
 
