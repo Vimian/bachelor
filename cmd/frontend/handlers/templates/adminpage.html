@@ -116,24 +116,18 @@
                 var list = listMaker(json);
                 document.getElementById("accounts").replaceChild(list);
                 */
-                var res = await jsonRequest("/api/user/" + userID, "GET").catch(
-                    async (error) => {
-                        return await error;
-                    }
-                );
-                console.log(res);
+                var res = await jsonRequest("/api/user/" + userID, "GET");
+
                 if (res.error) {
-                    console.log(1);
-                    console.log(res.error);
+                    // TODO: Add error display
+                    // document.getElementById("errorDisplay").innerHTML = res.error;
                 } else {
                     document.getElementById("detailedUserUsername").innerHTML =
                         res.username;
-                    console.log(res);
-                    console.log(2);
                 }
-                return;
             }
-            ///api/user/, POST, (JSON OBJECT), JSON
+
+            ///api/user/, "POST", (JSON OBJECT), "JSON"
             function jsonRequest(url, type, data, dataType) {
                 var res = $.ajax({
                     url: url,
@@ -147,7 +141,10 @@
                         return error;
                     },
                 });
-                return res;
+
+                return res.catch((error) => {
+                    return error.responseJSON;
+                });
             }
         </script>
     </body>
