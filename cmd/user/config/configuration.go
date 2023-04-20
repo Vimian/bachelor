@@ -15,4 +15,6 @@ type Configuration struct {
 		Name     string `yaml:"name"`
 		SSLMode  string `yaml:"sslmode"`
 	} `yaml:"database"`
+
+	DefaultXUsersAmount int `yaml:"defaultxusersamount"`
 }

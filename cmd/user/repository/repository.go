@@ -96,3 +96,43 @@ func (r *Repository) Get(id string) (*user.User, error) {
 	// Return the user
 	return &user, nil
 }
+
+func (r *Repository) GetXUsers(offset int, amount int) (*user.Users, error) {
+	// Prepare query
+	stmt, err := r.db.Prepare("SELECT * FROM users LIMIT $1 OFFSET $2")
+	if err != nil {
+		return nil, err
+	}
+	defer stmt.Close()
+
+	// Execute query
+	rows, err := stmt.Query(amount, offset)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	// Initialize users and set amount and offset
+	var users user.Users = user.Users{
+		Amount: amount,
+		Offset: offset,
+	}
+
+	// Scan result into users
+	for rows.Next() {
+		var user user.User
+		err = rows.Scan(
+			&user.ID,
+			&user.Username,
+			&user.FirstName,
+			&user.LastName,
+		)
+		if err != nil {
+			return nil, err
+		}
+		users.Users = append(users.Users, user)
+	}
+
+	// Return the users
+	return &users, nil
+}

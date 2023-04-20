@@ -34,7 +34,7 @@ func main() {
 	}
 
 	// Initialize Handlers
-	handler := handlers.NewHandler(repo)
+	handler := handlers.NewHandler(conf, repo)
 
 	// Initialize router
 	router := gin.Default()
@@ -42,6 +42,7 @@ func main() {
 	// Setup routes
 	router.POST("/user/", handler.CreateUser)
 	router.GET("/user/:id", handler.GetUser)
+	router.GET("/users/:page", handler.GetXUsers)
 
 	// Start HTTP server
 	var address string = conf.Server.Host + ":" + fmt.Sprint(conf.Server.Port)
