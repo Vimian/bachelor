@@ -142,7 +142,7 @@ func createTransactionHistory(transactionHistory *transactionhistory.Transaction
 	}
 
 	// Send post request to transaction-history with transactionHistory as body
-	url := fmt.Sprintf("http://%s:%d%s/", configuration.TransactionHistoryService.Host, configuration.TransactionHistoryService.Port, configuration.TransactionHistoryService.PathCreate)
+	url := fmt.Sprintf("http://%s:%d%s/", configuration.TransactionHistoryService.Host, configuration.TransactionHistoryService.Port, configuration.TransactionHistoryService.Path)
 	res, err := http.Post(url, "application/json", bytes.NewBuffer(body))
 	if err != nil {
 		return err
@@ -170,7 +170,8 @@ func updateTransactionHistoryStatus(id uuid.UUID, aStatus int32, configuration *
 	}
 
 	// Send put request to transaction-history with status as body
-	url := fmt.Sprintf("http://%s:%d%s/%s%s/", configuration.TransactionHistoryService.Host, configuration.TransactionHistoryService.Port, configuration.TransactionHistoryService.PathUpdateStatusPart0, id.String(), configuration.TransactionHistoryService.PathUpdateStatusPart1)
+	url := fmt.Sprintf("http://%s:%d%s%s/%s%s/", configuration.TransactionHistoryService.Host, configuration.TransactionHistoryService.Port, configuration.TransactionHistoryService.Path, configuration.TransactionHistoryService.PathUpdateStatusPart0, id.String(), configuration.TransactionHistoryService.PathUpdateStatusPart1)
+	log.Printf("url: %s", url)
 	res, err := commonHttp.PutRequest(url, "application/json", bytes.NewBuffer(body))
 	if err != nil {
 		resBytes, err := ioutil.ReadAll(res.Body)

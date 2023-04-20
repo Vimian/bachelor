@@ -151,6 +151,7 @@ func (r *Repository) GetTransactionHistories(accountid string) (*transactionhist
 			&transactionHistory.StartTimestamp,
 			&transactionHistory.EndTimestamp,
 			&transactionHistory.Status,
+			&transactionHistory.Type,
 		)
 		if err != nil {
 			return nil, err

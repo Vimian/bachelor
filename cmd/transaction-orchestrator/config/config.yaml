@@ -12,7 +12,7 @@ redis:
 transactionhistoryservice:
   host: transaction-history
   port: 8080
-  pathcreate: /transaction-history
+  path: /transaction-history
   pathupdatestatuspart0: /transaction
   pathupdatestatuspart1: /status
   statuscompleted: 1

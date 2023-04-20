@@ -24,7 +24,7 @@ type Configuration struct {
 	TransactionHistoryService struct {
 		Host                  string `yaml:"host"`
 		Port                  int    `yaml:"port"`
-		PathCreate            string `yaml:"pathcreate"`
+		Path                  string `yaml:"path"`
 		PathUpdateStatusPart0 string `yaml:"pathupdatestatuspart0"`
 		PathUpdateStatusPart1 string `yaml:"pathupdatestatuspart1"`
 		StatusCompleted       int32  `yaml:"statuscompleted"`
