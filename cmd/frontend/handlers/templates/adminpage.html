@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <link
+            rel="stylesheet"
+            href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css"
+        />
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.4/jquery.min.js"></script>
+        <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
+        <title>Admin Page</title>
+    </head>
+    <body>
+        <div class="container">
+            <div class="col-sm-4">
+                <form name="createUser" action="/api/user/" method="POST">
+                    <h3>Create user</h3>
+                    <label>Username</label><br />
+                    <input name="username" /><br />
+                    <label>First name</label><br />
+                    <input name="firstname" /><br />
+                    <label>Last name</label><br />
+                    <input name="lastname" /><br />
+                    <button type="submit">Create</button>
+                </form>
+                <div name="users">
+                    <h3>User list</h3>
+                    <button onclick="fillUserList">Refresh user list</button>
+                    <ul id="userList">
+                        <li>Refresh to see users</li>
+                    </ul>
+                    <button onclick="previousPage">Previous page</button>
+                    <label id="pageNr">Page: 0</label>
+                    <button onclick="nextPage">Next Page</button>
+                </div>
+            </div>
+            <div class="col-sm-4" name="detailedUser">
+                <h3>User info</h3>
+                <label>User ID</label>
+                <input id="userIDInput" />
+                <button
+                    onclick='findUser(document.getElementById("userIDInput").value)'
+                >
+                    Look up</button
+                ><br />
+                <div>
+                    <label>Username:</label>
+                    <p id="detailedUserUsername"></p>
+                    <label>First name:</label>
+                    <p id="firstname"></p>
+                    <label>Last name:</label>
+                    <p id="lastname"></p>
+                    <label>Accounts</label>
+                    <ul id="accounts"></ul>
+                </div>
+            </div>
+            <!--Remember force accounts error checking input box-->
+            <div class="col-sm-4" name="errorLog">
+                <h3>Error log</h3>
+                <button>Refresh error log</button>
+                <ul>
+                    <li>Refresh to see errors</li>
+                </ul>
+                <input />
+                <button>Check account</button>
+            </div>
+        </div>
+
+        <script>
+            var page = 0;
+
+            function fillUserList() {
+                var json = $.getJSON("/users/", page);
+                var list = listMaker(json);
+                document.getElementById("userList").replaceChild(list);
+                document.getElementById("pageNr").replaceChild("Page: " + page);
+            }
+
+            function nextPage() {
+                page + 1;
+                fillUserList;
+            }
+
+            function previousPage() {
+                page - 1;
+                fillUserList;
+            }
+
+            function listMaker(json) {
+                var list = document.createElement("ul");
+
+                for (var i = 0; i < Object.keys(json).length; i++) {
+                    var item = document.createElement("li");
+                    item.appendChild(
+                        document.createTextNode(Object.values(json)[i])
+                    );
+                    list.appendChild(item);
+                }
+
+                return list;
+            }
+
+            async function findUser(userID) {
+                /*
+                var user = $.getJSON(
+                    "/user/",
+                    getElementById(userIDInput).value
+                );
+                //add username, first name and last name
+                var json = $.getJSON(
+                    "accounts/" + getElementById(userIDInput).value
+                );
+                
+                var list = listMaker(json);
+                document.getElementById("accounts").replaceChild(list);
+                */
+                var res = await jsonRequest("/api/user/" + userID, "GET").catch(
+                    async (error) => {
+                        return await error;
+                    }
+                );
+                console.log(res);
+                if (res.error) {
+                    console.log(1);
+                    console.log(res.error);
+                } else {
+                    document.getElementById("detailedUserUsername").innerHTML =
+                        res.username;
+                    console.log(res);
+                    console.log(2);
+                }
+                return;
+            }
+            ///api/user/, POST, (JSON OBJECT), JSON
+            function jsonRequest(url, type, data, dataType) {
+                var res = $.ajax({
+                    url: url,
+                    type: type,
+                    data: data,
+                    dataType: dataType,
+                    success: function (result) {
+                        return result;
+                    },
+                    error: function (error) {
+                        return error;
+                    },
+                });
+                return res;
+            }
+        </script>
+    </body>
+</html>

@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <link
+            rel="stylesheet"
+            href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css"
+        />
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.4/jquery.min.js"></script>
+        <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
+        <title>Homepage</title>
+    </head>
+    <body>
+        <div class="col text-center">
+            <label>User id</label><br />
+            <input id="userIDInput" />
+            <button onclick="logIn">Log in</button><br />
+        </div>
+        <div class="container">
+            <div class="col-sm-6" name="accounts">
+                <br />
+                <h3>Accounts</h3>
+                <br />
+                <ul id="accounts"></ul>
+                <button>Create account</button>
+            </div>
+            <div class="col-sm-6">
+                <div name="account details">
+                    <h3>Account details</h3>
+                    <p id="accountName"></p>
+                    <p id="balance"></p>
+                    <ul id="transactionHistory"></ul>
+                </div>
+                <form name="transaction" action="/transaction/" method="POST">
+                    <h3>Transfor</h3>
+                    <label>Sending account</label><br />
+                    <select id="accountSelect" name="senderaccountid"></select
+                    ><br />
+                    <label>Receiving account</label><br />
+                    <input id="targetAccount" name="receiveraccountid" /><br />
+                    <label>Amount</label><br />
+                    <input id="transactionAmount" name="amount" />
+                    <button type="submit">Transfor credits</button>
+                </form>
+            </div>
+        </div>
+
+        <script>
+            var user;
+
+            function logIn() {
+                user = document.getElementById("userIDInput");
+                print(user);
+            }
+        </script>
+    </body>
+</html>
