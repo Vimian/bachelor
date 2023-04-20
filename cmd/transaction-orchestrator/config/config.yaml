@@ -1,0 +1,26 @@
+rabbitmq:
+  host: transaction-queue
+  port: 5672
+  user: guest
+  password: guest
+  queuename: transactions
+redis:
+  host: transaction-orchestrator-cache
+  port: 6379
+  password: ""
+  db: 0
+transactionhistoryservice:
+  host: transaction-history
+  port: 8080
+  path: /transaction-history
+  pathupdatestatuspart0: /transaction
+  pathupdatestatuspart1: /status
+  statuscompleted: 1
+  statusfailed: 2
+  typefailure: 1
+accountservice:
+  host: account
+  port: 8080
+  pathpart0: /account
+  pathpart1: /balance
+  failureaccountid: "00000000-0000-0000-0000-000000000001"

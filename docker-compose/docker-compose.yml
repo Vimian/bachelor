@@ -102,6 +102,42 @@ services:
     volumes:
       - transaction_queue_data:/var/lib/rabbitmq
 
+  transaction-orchestrator:
+    image: bachelor/transaction-orchestrator
+    restart: unless-stopped
+    build:
+      context: ${docker_compose_path_offset_to_root}
+      dockerfile: /cmd/transaction-orchestrator/Dockerfile
+      args:
+        - GO_VERSION=${go_version}
+        - service_path=cmd/transaction-orchestrator
+    #ports:
+    #  - "8080:8080"
+    depends_on:
+      - transaction-queue
+
+  transaction-orchestrator-cache:
+    image: redis:7.0.10
+    restart: unless-stopped
+    #ports:
+    #  - "6379:6379"
+
+  gateway:
+    image: nginx:1.23.4
+    restart: unless-stopped
+    ports:
+      - "80:80"
+    volumes:
+      - ${docker_compose_path_offset_to_root}/cmd/gateway/nginx.conf:/etc/nginx/nginx.conf
+      - ${docker_compose_path_offset_to_root}/cmd/gateway/html/:/usr/share/nginx/html/
+    depends_on:
+      - user
+      - account
+      - transaction-history
+      - transaction
+    #  - failure-finder-manager
+    #  - frontend
+
 volumes:
   user_db_data:
   account_db_data:

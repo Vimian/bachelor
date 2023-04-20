@@ -8,3 +8,4 @@ database:
   password: password
   name: user
   sslmode: disable
+defaultxusersamount: 10
