@@ -6,9 +6,10 @@ import (
 	"log"
 	"net/http"
 
-	"github.com/casperfj/bachelor/cmd/account/config"
-	"github.com/casperfj/bachelor/cmd/account/handlers"
-	"github.com/casperfj/bachelor/cmd/account/repository"
+	"github.com/casperfj/bachelor/cmd/failure-finder-manager/config"
+	"github.com/casperfj/bachelor/cmd/failure-finder-manager/handlers"
+	"github.com/casperfj/bachelor/cmd/failure-finder-manager/queue"
+	"github.com/casperfj/bachelor/cmd/failure-finder-manager/repository"
 	commonConfig "github.com/casperfj/bachelor/pkg/common/config"
 	"github.com/gin-gonic/gin"
 )
@@ -33,22 +34,31 @@ func main() {
 		panic("failed to initialize repository: " + err.Error())
 	}
 
+	// Initialize queue
+	queue, err := queue.NewQueue(conf)
+	if err != nil {
+		panic("failed to initialize queue: " + err.Error())
+	}
+
+	// Close queue on exit
+	defer queue.Connection.Close()
+	defer queue.Channel.Close()
+
 	// Initialize Handlers
-	handler := handlers.NewHandler(conf, repo)
+	handler := handlers.NewHandler(conf, repo, queue)
 
 	// Initialize router
 	router := gin.Default()
 
 	// Setup routes
-	router.POST("/account/", handler.CreateAccount)
-	router.GET("/account/:id", handler.GetAccount)
-	router.GET("/account/:id/balance/", handler.GetBalance)
-	router.PUT("/account/:id/balance/", handler.UpdateBalance)
-	router.GET("/accounts/:ownerid", handler.GetAccounts)
-	router.GET("/accounts/timestamp/:timestamp", handler.GetAccountIDsByTimestamp)
+	router.POST("/failure-finder-manager/account/:accountid", handler.ForceCheckAccount)
+	router.POST("/failure-finder-manager/all/", handler.ForceCheckAll)
+
+	// Start queueing loop
+	go handler.QueueingLoop()
 
 	// Start HTTP server
 	var address string = conf.Server.Host + ":" + fmt.Sprint(conf.Server.Port)
-	log.Printf("starting account service on: %s", address)
+	log.Printf("starting failure finder manager service on: %s", address)
 	log.Fatalf("server exited with error: %s", http.ListenAndServe(address, router).Error())
 }

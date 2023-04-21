@@ -111,8 +111,6 @@ services:
       args:
         - GO_VERSION=${go_version}
         - service_path=cmd/transaction-orchestrator
-    #ports:
-    #  - "8080:8080"
     depends_on:
       - transaction-queue
 
@@ -121,6 +119,55 @@ services:
     restart: unless-stopped
     #ports:
     #  - "6379:6379"
+
+  failure-finder-manager:
+    image: bachelor/failure-finder-manager
+    restart: unless-stopped
+    build:
+      context: ${docker_compose_path_offset_to_root}
+      dockerfile: /cmd/failure-finder-manager/Dockerfile
+      args:
+        - GO_VERSION=${go_version}
+        - service_path=cmd/failure-finder-manager
+    #ports:
+    #  - "8080:8080"
+    depends_on:
+      - failure-finder-db
+      - failure-finder-queue
+
+  failure-finder-db:
+    image: postgres:15.2
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${failure_finder_db_user}
+      POSTGRES_PASSWORD: ${failure_finder_db_password}
+      POSTGRES_DB: ${failure_finder_db_name}
+    #ports:
+    #  - "5432:5432"
+    volumes:
+      - failure_finder_db_data:/var/lib/mysql
+
+  failure-finder-queue:
+    image: rabbitmq:3.11.13-management
+    restart: unless-stopped
+    #ports:
+    #  - "5672:5672"
+    #  - "15672:15672"
+    volumes:
+      - failure_finder_queue_data:/var/lib/rabbitmq
+
+  failure-finder:
+    image: bachelor/failure-finder
+    restart: unless-stopped
+    build:
+      context: ${docker_compose_path_offset_to_root}
+      dockerfile: /cmd/failure-finder/Dockerfile
+      args:
+        - GO_VERSION=${go_version}
+        - service_path=cmd/failure-finder
+    depends_on:
+      - failure-finder-db
+      - failure-finder-queue
 
   gateway:
     image: nginx:1.23.4
@@ -155,3 +202,5 @@ volumes:
   account_db_data:
   transaction_history_db_data:
   transaction_queue_data:
+  failure_finder_db_data:
+  failure_finder_queue_data:

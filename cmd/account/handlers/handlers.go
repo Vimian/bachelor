@@ -12,11 +12,12 @@ type Handler struct {
 }
 
 type Handlers struct {
-	CreateAccount func(c *gin.Context)
-	GetAccount    func(c *gin.Context)
-	GetBalance    func(c *gin.Context)
-	UpdateBalance func(c *gin.Context)
-	GetAccounts   func(c *gin.Context)
+	CreateAccount            func(c *gin.Context)
+	GetAccount               func(c *gin.Context)
+	GetBalance               func(c *gin.Context)
+	UpdateBalance            func(c *gin.Context)
+	GetAccounts              func(c *gin.Context)
+	GetAccountIDsByTimestamp func(c *gin.Context)
 }
 
 func NewHandler(conf *config.Configuration, repo *repository.Repository) *Handlers {
@@ -28,10 +29,11 @@ func NewHandler(conf *config.Configuration, repo *repository.Repository) *Handle
 
 	// Return handlers
 	return &Handlers{
-		CreateAccount: h.CreateAccount,
-		GetAccount:    h.GetAccount,
-		GetBalance:    h.GetBalance,
-		UpdateBalance: h.UpdateBalance,
-		GetAccounts:   h.GetAccounts,
+		CreateAccount:            h.CreateAccount,
+		GetAccount:               h.GetAccount,
+		GetBalance:               h.GetBalance,
+		UpdateBalance:            h.UpdateBalance,
+		GetAccounts:              h.GetAccounts,
+		GetAccountIDsByTimestamp: h.GetAccountIDsByTimestamp,
 	}
 }

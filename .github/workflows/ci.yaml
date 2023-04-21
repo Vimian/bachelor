@@ -24,6 +24,8 @@ jobs:
           - transaction-history
           - transaction
           - transaction-orchestrator
+          - failure-finder-manager
+          - failure-finder
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3

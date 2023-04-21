@@ -1,0 +1,29 @@
+database:
+  host: failure-finder-db
+  port: 5432
+  user: root
+  password: password
+  name: failure-finder
+  sslmode: disable
+rabbitmq:
+  host: failure-finder-queue
+  port: 5672
+  user: guest
+  password: guest
+  queuename: accounts
+transactionhistoryservice:
+  host: transaction-history
+  port: 8080
+  path: /transaction-histories
+  statuscompleted: 1
+  typefailure: 1
+accountservice:
+  host: account
+  port: 8080
+  path: /account
+  pathbalance: /balance
+  failureaccountid: "00000000-0000-0000-0000-000000000001"
+transactionservice:
+  host: transaction
+  port: 8080
+  path: /transaction
