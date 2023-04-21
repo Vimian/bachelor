@@ -48,11 +48,38 @@
         </div>
 
         <script>
-            var user;
+            var userID;
 
             function logIn() {
-                user = document.getElementById("userIDInput");
-                print(user);
+                userID = document.getElementById("userIDInput");
+            }
+
+            function createAccount() {
+                jsonRequest(
+                    "/api/account/",
+                    "POST",
+                    { ownerid: userID },
+                    "JSON"
+                );
+            }
+
+            function jsonRequest(url, type, data, dataType) {
+                var res = $.ajax({
+                    url: url,
+                    type: type,
+                    data: data,
+                    dataType: dataType,
+                    success: function (result) {
+                        return result;
+                    },
+                    error: function (error) {
+                        return error;
+                    },
+                });
+
+                return res.catch((error) => {
+                    return error.responseJSON;
+                });
             }
         </script>
     </body>

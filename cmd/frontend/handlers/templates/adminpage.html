@@ -14,116 +14,167 @@
     </head>
     <body>
         <div class="container">
-            <div class="col-sm-4">
-                <form name="createUser" action="/api/user/" method="POST">
-                    <h3>Create user</h3>
-                    <label>Username</label><br />
-                    <input name="username" /><br />
-                    <label>First name</label><br />
-                    <input name="firstname" /><br />
-                    <label>Last name</label><br />
-                    <input name="lastname" /><br />
-                    <button type="submit">Create</button>
-                </form>
-                <div name="users">
-                    <h3>User list</h3>
-                    <button onclick="fillUserList">Refresh user list</button>
-                    <ul id="userList">
-                        <li>Refresh to see users</li>
+            <div class="row">
+                <div class="col-sm-4">
+                    <div name="createUser">
+                        <h3>Create user</h3>
+                        <label>Username</label><br />
+                        <input id="createUserUsername" /><br />
+                        <label>First name</label><br />
+                        <input id="createUserFirstname" /><br />
+                        <label>Last name</label><br />
+                        <input id="createUserLastname" /><br />
+                        <button
+                            class="btn btn-primary"
+                            onclick='createUser(document.getElementById("createUserUsername").value,
+                        document.getElementById("createUserFirstname").value,
+                        document.getElementById("createUserLastname").value)'
+                        >
+                            Create
+                        </button>
+                    </div>
+                    <div name="users">
+                        <h3>User list</h3>
+                        <button
+                            class="btn btn-primary"
+                            onclick="fillUserList()"
+                        >
+                            Refresh user list
+                        </button>
+                        <ul id="userList">
+                            <li>Refresh to see users</li>
+                        </ul>
+                        <button
+                            class="btn btn-primary"
+                            onclick="changePage(-1)"
+                        >
+                            Previous page
+                        </button>
+                        <label id="pageNr">Page: 0</label>
+                        <button class="btn btn-primary" onclick="changePage(1)">
+                            Next Page
+                        </button>
+                    </div>
+                </div>
+                <div class="col-sm-4" name="detailedUser">
+                    <h3>User info</h3>
+                    <label>User ID</label>
+                    <input id="detailedUserUserIDInput" />
+                    <button
+                        class="btn btn-primary"
+                        onclick='findUser(document.getElementById("detailedUserUserIDInput").value)'
+                    >
+                        Look up</button
+                    ><br />
+                    <div>
+                        <div class="row">
+                            <div class="col-sm-4">
+                                <label>Username:</label>
+                            </div>
+                            <div class="col-sm-8">
+                                <p id="detailedUserUsername"></p>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-sm-4">
+                                <label>First name:</label>
+                            </div>
+                            <div class="col-sm-8">
+                                <p id="detailedUserFirstname"></p>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-sm-4">
+                                <label>Last name:</label>
+                            </div>
+                            <div class="col-sm-8">
+                                <p id="detailedUserLastname"></p>
+                            </div>
+                        </div>
+
+                        <label>Accounts</label>
+                        <ul id="detailedUserAccounts"></ul>
+                    </div>
+                </div>
+                <!--Remember force accounts error checking input box-->
+                <div class="col-sm-4" name="correctionTransactions">
+                    <h3>Correction transactions</h3>
+                    <button class="btn btn-primary">Refresh</button>
+                    <ul>
+                        <li>Refresh to see corrections</li>
                     </ul>
-                    <button onclick="previousPage">Previous page</button>
-                    <label id="pageNr">Page: 0</label>
-                    <button onclick="nextPage">Next Page</button>
+                    <input />
+                    <button class="btn btn-primary">Check account</button>
                 </div>
             </div>
-            <div class="col-sm-4" name="detailedUser">
-                <h3>User info</h3>
-                <label>User ID</label>
-                <input id="userIDInput" />
-                <button
-                    onclick='findUser(document.getElementById("userIDInput").value)'
-                >
-                    Look up</button
-                ><br />
-                <div>
-                    <label>Username:</label>
-                    <p id="detailedUserUsername"></p>
-                    <label>First name:</label>
-                    <p id="firstname"></p>
-                    <label>Last name:</label>
-                    <p id="lastname"></p>
-                    <label>Accounts</label>
-                    <ul id="accounts"></ul>
-                </div>
-            </div>
-            <!--Remember force accounts error checking input box-->
-            <div class="col-sm-4" name="errorLog">
-                <h3>Error log</h3>
-                <button>Refresh error log</button>
-                <ul>
-                    <li>Refresh to see errors</li>
-                </ul>
-                <input />
-                <button>Check account</button>
-            </div>
+        </div>
+        <div name="errorDisplay" class="text-center">
+            <h3>Error display</h3>
+            <p id="errorDisplay"></p>
         </div>
 
         <script>
             var page = 0;
 
-            function fillUserList() {
-                var json = $.getJSON("/users/", page);
-                var list = listMaker(json);
-                document.getElementById("userList").replaceChild(list);
-                document.getElementById("pageNr").replaceChild("Page: " + page);
-            }
+            async function fillUserList() {
+                var res = await jsonRequest("/api/users/" + page, "GET");
 
-            function nextPage() {
-                page + 1;
-                fillUserList;
-            }
-
-            function previousPage() {
-                page - 1;
-                fillUserList;
-            }
-
-            function listMaker(json) {
-                var list = document.createElement("ul");
-
-                for (var i = 0; i < Object.keys(json).length; i++) {
-                    var item = document.createElement("li");
-                    item.appendChild(
-                        document.createTextNode(Object.values(json)[i])
-                    );
-                    list.appendChild(item);
+                if (res.error) {
+                    document.getElementById("errorDisplay").innerHTML =
+                        res.error;
+                    return;
                 }
 
-                return list;
+                document.getElementById("userList").innerHTML = "";
+                var list = document.createElement("ul");
+                list.classList.add("list-group");
+                if (res.users) {
+                    for (var i = 0; i < res.users.length; i++) {
+                        var item = document.createElement("li");
+                        item.classList.add("list-group-item");
+                        var div = document.createElement("div");
+                        div.appendChild(
+                            document.createTextNode(
+                                "Username: " + res.users[i].username
+                            )
+                        );
+                        div.appendChild(document.createElement("br"));
+                        div.appendChild(
+                            document.createTextNode("ID: " + res.users[i].id)
+                        );
+                        item.appendChild(div);
+                        list.appendChild(item);
+                    }
+                }
+
+                document.getElementById("userList").appendChild(list);
+            }
+
+            function changePage(number) {
+                page = page + number;
+                fillUserList();
+                document.getElementById("pageNr").innerHTML = "Page: " + page;
             }
 
             async function findUser(userID) {
-                /*
-                var user = $.getJSON(
-                    "/user/",
-                    getElementById(userIDInput).value
-                );
-                //add username, first name and last name
-                var json = $.getJSON(
-                    "accounts/" + getElementById(userIDInput).value
-                );
-                
-                var list = listMaker(json);
-                document.getElementById("accounts").replaceChild(list);
-                */
                 var res = await jsonRequest("/api/user/" + userID, "GET");
 
                 if (res.error) {
-                    // TODO: Add error display
-                    // document.getElementById("errorDisplay").innerHTML = res.error;
+                    document.getElementById("errorDisplay").innerHTML =
+                        res.error;
                 } else {
                     document.getElementById("detailedUserUsername").innerHTML =
                         res.username;
+                    document.getElementById("detailedUserFirstname").innerHTML =
+                        res.firstname;
+                    document.getElementById("detailedUserLastname").innerHTML =
+                        res.lastname;
+                    /*
+                        document.getElementById("detailedUserAccounts").innerHTML =
+                        listMaker(
+                            await jsonRequest("/api/accounts/" + userID, "GET")
+                        );
+                    */
                 }
             }
 
@@ -146,6 +197,20 @@
                     return error.responseJSON;
                 });
             }
+
+            function createUser(username, firstname, lastname) {
+                var user = {
+                    username: username,
+                    firstname: firstname,
+                    lastname: lastname,
+                };
+                jsonRequest("/api/user/", "POST", JSON.stringify(user), "JSON");
+                fillUserList();
+            }
+        </script>
+        <script>
+            //init site
+            fillUserList();
         </script>
     </body>
 </html>
