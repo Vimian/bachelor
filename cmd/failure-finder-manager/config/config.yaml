@@ -1,0 +1,24 @@
+server:
+  host: 0.0.0.0
+  port: 8080
+database:
+  host: failure-finder-db
+  port: 5432
+  user: root
+  password: password
+  name: failure-finder
+  sslmode: disable
+rabbitmq:
+  host: failure-finder-queue
+  port: 5672
+  user: guest
+  password: guest
+  queuename: accounts
+accountservice:
+  host: account
+  port: 8080
+  getaccountsbytimestamppath: /accounts/timestamp
+queueingloopinterval: 60
+enqueuedelay: 3600
+enqueueaccountsperfetch: 100
+fetchaccountrewind: 5

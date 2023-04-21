@@ -134,6 +134,38 @@ func (r *Repository) GetAccounts(ownerid string) (*account.Accounts, error) {
 	return &accounts, nil
 }
 
+func (r *Repository) GetAccountIDsByTimestamp(timestamp string) (*account.AccountIDs, error) {
+	// Prepare query
+	stmt, err := r.db.Prepare("SELECT id FROM accounts WHERE createtimestamp > $1")
+	if err != nil {
+		return nil, err
+	}
+	defer stmt.Close()
+
+	// Execute query
+	rows, err := stmt.Query(timestamp)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	// Initialize account ids
+	var accountIDs account.AccountIDs
+
+	// Scan result into account ids
+	for rows.Next() {
+		var accountID uuid.UUID
+		err = rows.Scan(&accountID)
+		if err != nil {
+			return nil, err
+		}
+		accountIDs.AccountIDs = append(accountIDs.AccountIDs, accountID)
+	}
+
+	// Return the account ids
+	return &accountIDs, nil
+}
+
 func (r *Repository) GetBalance(accountID string) (*account.Balance, error) {
 	// Prepare query
 	stmt, err := r.db.Prepare("SELECT id, balance FROM accounts WHERE id = $1")
