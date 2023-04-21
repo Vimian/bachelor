@@ -77,11 +77,11 @@ func doTransaction(transactionHistory *transactionhistory.TransactionHistory, co
 	wg.Add(3)
 
 	go func() {
-		errChan <- task{0, updateBalance(transactionHistory.Transaction.SenderAccountID, transactionHistory.Transaction.Amount*-1, configuration)}
+		errChan <- task{0, updateBalance(transactionHistory.Transaction.SenderAccountID, transactionHistory.Transaction.Amount*-1, transactionHistory.Type, configuration)}
 		wg.Done()
 	}()
 	go func() {
-		errChan <- task{1, updateBalance(transactionHistory.Transaction.ReceiverAccountID, transactionHistory.Transaction.Amount, configuration)}
+		errChan <- task{1, updateBalance(transactionHistory.Transaction.ReceiverAccountID, transactionHistory.Transaction.Amount, transactionHistory.Type, configuration)}
 		wg.Done()
 	}()
 	go func() {
@@ -106,7 +106,7 @@ func undoTransaction(transactionHistory *transactionhistory.TransactionHistory, 
 		// Check if updateBalance failed
 		if failures[0] == false {
 			// Revert changes to balance
-			errChan <- updateBalance(transactionHistory.Transaction.SenderAccountID, transactionHistory.Transaction.Amount, configuration)
+			errChan <- updateBalance(transactionHistory.Transaction.SenderAccountID, transactionHistory.Transaction.Amount, transactionHistory.Type, configuration)
 		}
 		wg.Done()
 	}()
@@ -114,7 +114,7 @@ func undoTransaction(transactionHistory *transactionhistory.TransactionHistory, 
 		// Check if updateBalance failed
 		if failures[1] == false {
 			// Revert changes to balance
-			errChan <- updateBalance(transactionHistory.Transaction.ReceiverAccountID, transactionHistory.Transaction.Amount*-1, configuration)
+			errChan <- updateBalance(transactionHistory.Transaction.ReceiverAccountID, transactionHistory.Transaction.Amount*-1, transactionHistory.Type, configuration)
 		}
 		wg.Done()
 	}()
@@ -186,10 +186,16 @@ func updateTransactionHistoryStatus(id uuid.UUID, aStatus int32, configuration *
 	return nil
 }
 
-func updateBalance(id uuid.UUID, amount int64, configuration *config.Configuration) error {
+func updateBalance(id uuid.UUID, amount int64, transactionType int32, configuration *config.Configuration) error {
+	// Skip if it is the failure account
+	if id == configuration.AccountService.FailureAccountID {
+		return nil
+	}
+
 	// Create balance update
 	balanceUpdate := &account.BalanceUpdate{
-		BalanceChange: amount,
+		BalanceChange:   amount,
+		TransactionType: transactionType,
 	}
 	body, err := json.Marshal(balanceUpdate)
 	if err != nil {

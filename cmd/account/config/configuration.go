@@ -16,5 +16,6 @@ type Configuration struct {
 		SSLMode  string `yaml:"sslmode"`
 	} `yaml:"database"`
 
-	DefaultAccountName string `yaml:"defaultaccountname"`
+	DefaultAccountName    string `yaml:"defaultaccountname"`
+	TransactionTypeNormal int32  `yaml:"transactiontypenormal"`
 }

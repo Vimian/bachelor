@@ -30,8 +30,8 @@ func (h *Handler) UpdateBalance(c *gin.Context) {
 	// Update balance
 	account.Balance = account.Balance + balanceUpdate.BalanceChange
 
-	// Check if account is overdrawn
-	if account.Balance < account.OverdrawLimit {
+	// Check if account is overdrawn if normal transaction
+	if balanceUpdate.TransactionType == h.conf.TransactionTypeNormal && account.Balance < account.OverdrawLimit {
 		log.Printf("account is overdrawn. {account.id: %s}", id)
 		c.JSON(http.StatusBadRequest, gin.H{"error": "account can't be overdrawn beyond overdraw limit"})
 		return
