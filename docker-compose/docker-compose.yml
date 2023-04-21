@@ -111,8 +111,6 @@ services:
       args:
         - GO_VERSION=${go_version}
         - service_path=cmd/transaction-orchestrator
-    #ports:
-    #  - "8080:8080"
     depends_on:
       - transaction-queue
 
@@ -157,6 +155,19 @@ services:
     #  - "15672:15672"
     volumes:
       - failure_finder_queue_data:/var/lib/rabbitmq
+
+  failure-finder:
+    image: bachelor/failure-finder
+    restart: unless-stopped
+    build:
+      context: ${docker_compose_path_offset_to_root}
+      dockerfile: /cmd/failure-finder/Dockerfile
+      args:
+        - GO_VERSION=${go_version}
+        - service_path=cmd/failure-finder
+    depends_on:
+      - failure-finder-db
+      - failure-finder-queue
 
   gateway:
     image: nginx:1.23.4

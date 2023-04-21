@@ -15,6 +15,7 @@ type Handler struct {
 
 type Handlers struct {
 	ForceCheckAccount gin.HandlerFunc
+	ForceCheckAll     gin.HandlerFunc
 	GetNewAccounts    func(int64)
 	QueueingLoop      func()
 	EnqueueAccounts   func(int64)
@@ -31,6 +32,7 @@ func NewHandler(conf *config.Configuration, repo *repository.Repository, queue *
 	// Return handlers
 	return &Handlers{
 		ForceCheckAccount: h.ForceCheckAccount,
+		ForceCheckAll:     h.ForceCheckAll,
 		GetNewAccounts:    h.GetNewAccounts,
 		QueueingLoop:      h.QueueingLoop,
 		EnqueueAccounts:   h.EnqueueAccounts,

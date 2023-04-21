@@ -52,6 +52,7 @@ func main() {
 
 	// Setup routes
 	router.POST("/failure-finder-manager/account/:accountid", handler.ForceCheckAccount)
+	router.POST("/failure-finder-manager/all/", handler.ForceCheckAll)
 
 	// Start queueing loop
 	go handler.QueueingLoop()
