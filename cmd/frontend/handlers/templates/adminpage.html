@@ -97,14 +97,34 @@
                     </div>
                 </div>
                 <!--Remember force accounts error checking input box-->
-                <div class="col-sm-4" name="correctionTransactions">
-                    <h3>Correction transactions</h3>
-                    <button class="btn btn-primary">Refresh</button>
-                    <ul>
-                        <li>Refresh to see corrections</li>
-                    </ul>
-                    <input />
-                    <button class="btn btn-primary">Check account</button>
+                <div class="col-sm-4" name="correction">
+                    <div>
+                        <h3>Corrupt balance</h3>
+                        <label>Amount</label><br />
+                        <input id="corruptBalanceAmount" /><br />
+                        <label>Account ID</label><br />
+                        <input id="corruptBalanceAccountID" /><br />
+                        <button
+                            onclick='corruptBalnce(document.getElementById("corruptBalanceAmount").value, document.getElementById("corruptBalanceAccountID").value)'
+                        >
+                            Corrupt
+                        </button>
+                    </div>
+                    <div>
+                        <h3>Correction transactions</h3>
+                        <button
+                            class="btn btn-primary"
+                            id="refreshCorrectionTransactions"
+                            onclick='getCorrectionTransactions(document.getElementById("correctionTransactionsList"))'
+                        >
+                            Refresh
+                        </button>
+                        <ul id="correctionTransactionsList">
+                            <li>Refresh to see corrections</li>
+                        </ul>
+                        <input />
+                        <button class="btn btn-primary">Check account</button>
+                    </div>
                 </div>
             </div>
         </div>
@@ -169,12 +189,45 @@
                         res.firstname;
                     document.getElementById("detailedUserLastname").innerHTML =
                         res.lastname;
-                    /*
-                        document.getElementById("detailedUserAccounts").innerHTML =
-                        listMaker(
-                            await jsonRequest("/api/accounts/" + userID, "GET")
-                        );
-                    */
+                    var accountsRes = await jsonRequest(
+                        "/api/accounts/" + userID,
+                        "GET"
+                    );
+                    var accountsList = document.createElement("ul");
+                    accountsList.classList.add("list-group");
+                    if (accountsRes.accounts) {
+                        for (var i = 0; i < accountsRes.accounts.length; i++) {
+                            var item = document.createElement("li");
+                            item.classList.add("list-group-item");
+                            var div = document.createElement("div");
+                            div.appendChild(
+                                document.createTextNode(
+                                    "Account ID: " + accountsRes.accounts[i].id
+                                )
+                            );
+                            div.appendChild(document.createElement("br"));
+                            div.appendChild(
+                                document.createTextNode(
+                                    "Account name: " +
+                                        accountsRes.accounts[i].name
+                                )
+                            );
+                            div.appendChild(document.createElement("br"));
+                            div.appendChild(
+                                document.createTextNode(
+                                    "Balance: " +
+                                        accountsRes.accounts[i].balance
+                                )
+                            );
+                            item.appendChild(div);
+                            accountsList.appendChild(item);
+                        }
+                    }
+                    document.getElementById("detailedUserAccounts").innerHTML =
+                        "";
+                    document
+                        .getElementById("detailedUserAccounts")
+                        .appendChild(accountsList);
                 }
             }
 
@@ -183,7 +236,7 @@
                 var res = $.ajax({
                     url: url,
                     type: type,
-                    data: data,
+                    data: JSON.stringify(data),
                     dataType: dataType,
                     success: function (result) {
                         return result;
@@ -204,8 +257,30 @@
                     firstname: firstname,
                     lastname: lastname,
                 };
-                jsonRequest("/api/user/", "POST", JSON.stringify(user), "JSON");
+                jsonRequest("/api/user/", "POST", user, "JSON");
                 fillUserList();
+            }
+
+            async function getCorrectionTransactions(list) {
+                var res = await jsonRequest(
+                    "/api/transaction-histories/00000000-0000-0000-0000-000000000001",
+                    "GET"
+                );
+                console.log(res);
+            }
+
+            //Remember to look at this later
+            function corruptBalnce(amount, accountID) {
+                var data = {
+                    balancechange: Number(amount),
+                    transactiontype: 0,
+                };
+                jsonRequest(
+                    "/api/account/" + accountID + "/balance/",
+                    "PUT",
+                    data,
+                    "JSON"
+                );
             }
         </script>
         <script>

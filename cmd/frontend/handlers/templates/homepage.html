@@ -16,33 +16,47 @@
         <div class="col text-center">
             <label>User id</label><br />
             <input id="userIDInput" />
-            <button onclick="logIn">Log in</button><br />
+            <button onclick="logIn()">Log in</button><br />
         </div>
         <div class="container">
             <div class="col-sm-6" name="accounts">
                 <br />
                 <h3>Accounts</h3>
+                <label>Account name</label><br />
+                <input id="newAccountName" />
+                <button
+                    onclick='createAccount(document.getElementById("newAccountName").value)'
+                >
+                    Create account
+                </button>
                 <br />
                 <ul id="accounts"></ul>
-                <button>Create account</button>
             </div>
             <div class="col-sm-6">
-                <div name="account details">
+                <div name="accountDetails">
                     <h3>Account details</h3>
-                    <p id="accountName"></p>
-                    <p id="balance"></p>
-                    <ul id="transactionHistory"></ul>
+                    <p id="detailedAccountName"></p>
+                    <p id="detailedBalance"></p>
+                    <ul id="detailedTransactionHistory"></ul>
                 </div>
                 <form name="transaction" action="/transaction/" method="POST">
                     <h3>Transfor</h3>
                     <label>Sending account</label><br />
-                    <select id="accountSelect" name="senderaccountid"></select
+                    <select id="accountSelect"></select>
+                    <button
+                        onclick='fillAccountSelect(document.getElementById("accountSelect"))'
+                    >
+                        Refresh select</button
                     ><br />
                     <label>Receiving account</label><br />
-                    <input id="targetAccount" name="receiveraccountid" /><br />
+                    <input id="targetAccount" /><br />
                     <label>Amount</label><br />
-                    <input id="transactionAmount" name="amount" />
-                    <button type="submit">Transfor credits</button>
+                    <input id="transactionAmount" /><br />
+                    <button
+                        onclick='transforCredits(document.getElementById("accountSelect").value, document.getElementById("targetAccount").value, document.getElementById("transactionAmount").value)'
+                    >
+                        Transfor credits
+                    </button>
                 </form>
             </div>
         </div>
@@ -51,23 +65,22 @@
             var userID;
 
             function logIn() {
-                userID = document.getElementById("userIDInput");
+                userID = document.getElementById("userIDInput").value;
+                fillAccountList();
             }
 
-            function createAccount() {
-                jsonRequest(
-                    "/api/account/",
-                    "POST",
-                    { ownerid: userID },
-                    "JSON"
-                );
+            //den nyeste account kommer ikke med når man køre functionen
+            function createAccount(accountName) {
+                var account = { name: accountName, ownerid: userID };
+                jsonRequest("/api/account/", "POST", account, "JSON");
+                fillAccountList();
             }
 
             function jsonRequest(url, type, data, dataType) {
                 var res = $.ajax({
                     url: url,
                     type: type,
-                    data: data,
+                    data: JSON.stringify(data),
                     dataType: dataType,
                     success: function (result) {
                         return result;
@@ -80,6 +93,92 @@
                 return res.catch((error) => {
                     return error.responseJSON;
                 });
+            }
+
+            async function getAccounts() {
+                var accountsRes = await jsonRequest(
+                    "/api/accounts/" + userID,
+                    "GET"
+                );
+                return accountsRes.accounts;
+            }
+
+            async function fillAccountList() {
+                var accounts = await getAccounts();
+                console.log(accounts);
+                var accountsList = document.createElement("ul");
+                accountsList.classList.add("list-group");
+                if (accounts) {
+                    for (var i = 0; i < accounts.length; i++) {
+                        var item = document.createElement("li");
+                        item.classList.add("list-group-item");
+                        var div = document.createElement("div");
+                        div.appendChild(
+                            document.createTextNode(
+                                "Account ID: " + accounts[i].id
+                            )
+                        );
+                        div.appendChild(document.createElement("br"));
+                        div.appendChild(
+                            document.createTextNode(
+                                "Account name: " + accounts[i].name
+                            )
+                        );
+                        div.appendChild(document.createElement("br"));
+                        div.appendChild(
+                            document.createTextNode(
+                                "Balance: " + accounts[i].balance
+                            )
+                        );
+                        //need to add a way to get info out after creation
+                        item.appendChild(div);
+                        item.onclick = function () {
+                            showAccountDetails(accounts[i].id);
+                        };
+                        accountsList.appendChild(item);
+                    }
+                }
+                document.getElementById("accounts").innerHTML = "";
+                document.getElementById("accounts").appendChild(accountsList);
+            }
+
+            async function showAccountDetails(accountID) {
+                /*
+                document.getElementById("detailedAccountName").innerHTML =
+                    accountName;
+                document.getElementById("detailedBalance").innerHTML =
+                    accountBalance;
+                */
+                var res = await jsonRequest(
+                    "/api/transaction-histories/" + accountID
+                );
+                console.log(res);
+            }
+
+            async function fillAccountSelect(select) {
+                var accounts = await getAccounts();
+                select.innerHTML = "";
+                if (accounts) {
+                    for (var i = 0; i < accounts.length; i++) {
+                        var opt = document.createElement("option");
+                        opt.value = accounts[i].id;
+                        opt.innerHTML = accounts[i].name;
+                        select.appendChild(opt);
+                    }
+                }
+            }
+
+            function transforCredits(
+                senderAccountID,
+                receivingID,
+                creditAmount
+            ) {
+                var data = {
+                    senderaccountid: senderAccountID,
+                    receiveraccountid: receivingID,
+                    amount: Number(creditAmount),
+                };
+                jsonRequest("/api/transaction/", "POST", data, "JSON");
             }
         </script>
     </body>
