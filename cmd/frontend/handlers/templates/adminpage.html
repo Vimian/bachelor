@@ -105,6 +105,7 @@
                         <label>Account ID</label><br />
                         <input id="corruptBalanceAccountID" /><br />
                         <button
+                            class="btn btn-primary"
                             onclick='corruptBalnce(document.getElementById("corruptBalanceAmount").value, document.getElementById("corruptBalanceAccountID").value)'
                         >
                             Corrupt
@@ -122,8 +123,19 @@
                         <ul id="correctionTransactionsList">
                             <li>Refresh to see corrections</li>
                         </ul>
-                        <input />
-                        <button class="btn btn-primary">Check account</button>
+                        <input id="forceCheckAccountID" />
+                        <button
+                            class="btn btn-primary"
+                            onclick='forceCheckAccount(document.getElementById("forceCheckAccountID").value)'
+                        >
+                            Check account</button
+                        ><br />
+                        <button
+                            class="btn btn-primary"
+                            onclick="forceCheckAllAccounts()"
+                        >
+                            Force check all accounts
+                        </button>
                     </div>
                 </div>
             </div>
@@ -153,15 +165,15 @@
                         var item = document.createElement("li");
                         item.classList.add("list-group-item");
                         var div = document.createElement("div");
-                        div.appendChild(
-                            document.createTextNode(
-                                "Username: " + res.users[i].username
-                            )
-                        );
-                        div.appendChild(document.createElement("br"));
-                        div.appendChild(
-                            document.createTextNode("ID: " + res.users[i].id)
-                        );
+
+                        var unp = document.createElement("p");
+                        unp.innerHTML = "Username: " + res.users[i].username;
+                        div.appendChild(unp);
+
+                        var uidp = document.createElement("p");
+                        uidp.innerHTML = "ID: " + res.users[i].id;
+                        div.appendChild(uidp);
+
                         item.appendChild(div);
                         list.appendChild(item);
                     }
@@ -200,25 +212,23 @@
                             var item = document.createElement("li");
                             item.classList.add("list-group-item");
                             var div = document.createElement("div");
-                            div.appendChild(
-                                document.createTextNode(
-                                    "Account ID: " + accountsRes.accounts[i].id
-                                )
-                            );
-                            div.appendChild(document.createElement("br"));
-                            div.appendChild(
-                                document.createTextNode(
-                                    "Account name: " +
-                                        accountsRes.accounts[i].name
-                                )
-                            );
-                            div.appendChild(document.createElement("br"));
-                            div.appendChild(
-                                document.createTextNode(
-                                    "Balance: " +
-                                        accountsRes.accounts[i].balance
-                                )
-                            );
+
+                            var aidp = document.createElement("p");
+                            aidp.innerHTML =
+                                "Account ID: " + accountsRes.accounts[i].id;
+                            div.appendChild(aidp);
+
+                            var anp = document.createElement("p");
+                            anp.innerHTML =
+                                "Account name: " + accountsRes.accounts[i].name;
+                            div.appendChild(anp);
+
+                            var abp = document.createElement("p");
+                            abp.innerHTML =
+                                "Account balance: " +
+                                accountsRes.accounts[i].balance;
+                            div.appendChild(abp);
+
                             item.appendChild(div);
                             accountsList.appendChild(item);
                         }
@@ -266,14 +276,68 @@
                     "/api/transaction-histories/00000000-0000-0000-0000-000000000001",
                     "GET"
                 );
-                console.log(res);
+
+                var transactionList = document.createElement("ul");
+                transactionList.classList.add("list-group");
+
+                if (res.transactionhistories) {
+                    for (var i = 0; i < res.transactionhistories.length; i++) {
+                        var item = document.createElement("li");
+                        item.classList.add("list-group-item");
+                        var div = document.createElement("div");
+                        var tidp = document.createElement("p");
+                        tidp.innerHTML =
+                            "Transaction ID: " +
+                            res.transactionhistories[i].transaction.id;
+                        div.appendChild(tidp);
+
+                        var tsaidp = document.createElement("p");
+                        tsaidp.innerHTML =
+                            "Sender account ID: " +
+                            res.transactionhistories[i].transaction
+                                .senderaccountid;
+                        div.appendChild(tsaidp);
+
+                        var traidp = document.createElement("p");
+                        traidp.innerHTML =
+                            "Receiver account ID: " +
+                            res.transactionhistories[i].transaction
+                                .receiveraccountid;
+                        div.appendChild(traidp);
+
+                        var tcap = document.createElement("p");
+                        tcap.innerHTML =
+                            "Credit amount: " +
+                            res.transactionhistories[i].transaction.amount;
+                        div.appendChild(tcap);
+
+                        var tsp = document.createElement("p");
+                        if (res.transactionhistories[i].status == "1") {
+                            tsp.innerHTML = "Status: complete";
+                            tsp.classList.add("text-success");
+                        } else if (res.transactionhistories[i].status == "2") {
+                            tsp.innerHTML = "Status: failed";
+                            tsp.classList.add("text-danger");
+                        } else {
+                            tsp.innerHTML = "Status: pending";
+                            tsp.classList.add("text-warning");
+                        }
+                        div.appendChild(tsp);
+
+                        item.appendChild(div);
+                        transactionList.appendChild(item);
+                    }
+                }
+
+                list.innerHTML = "";
+                list.appendChild(transactionList);
             }
 
             //Remember to look at this later
             function corruptBalnce(amount, accountID) {
                 var data = {
                     balancechange: Number(amount),
-                    transactiontype: 0,
+                    transactiontype: 1,
                 };
                 jsonRequest(
                     "/api/account/" + accountID + "/balance/",
@@ -282,10 +346,24 @@
                     "JSON"
                 );
             }
+
+            function forceCheckAccount(accountID) {
+                jsonRequest(
+                    "/api/failure-finder-manager/account/" + accountID,
+                    "POST"
+                );
+            }
+
+            function forceCheckAllAccounts() {
+                jsonRequest("/api/failure-finder-manager/all/", "POST");
+            }
         </script>
         <script>
             //init site
             fillUserList();
+            getCorrectionTransactions(
+                document.getElementById("correctionTransactionsList")
+            );
         </script>
     </body>
 </html>

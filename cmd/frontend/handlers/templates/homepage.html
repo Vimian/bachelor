@@ -16,21 +16,31 @@
         <div class="col text-center">
             <label>User id</label><br />
             <input id="userIDInput" />
-            <button onclick="logIn()">Log in</button><br />
+            <button class="btn btn-primary" onclick="logIn()">Log in</button
+            ><br />
         </div>
         <div class="container">
             <div class="col-sm-6" name="accounts">
-                <br />
-                <h3>Accounts</h3>
-                <label>Account name</label><br />
-                <input id="newAccountName" />
-                <button
-                    onclick='createAccount(document.getElementById("newAccountName").value)'
-                >
-                    Create account
-                </button>
-                <br />
-                <ul id="accounts"></ul>
+                <div name="userDetails">
+                    <h3>User details</h3>
+                    <p id="detailedUserID"></p>
+                    <p id="detailedUserUsername"></p>
+                    <p id="detailedUserFirstname"></p>
+                    <p id="detailedUserLastname"></p>
+                </div>
+                <div name="userAccounts">
+                    <h3>Accounts</h3>
+                    <label>Account name</label><br />
+                    <input id="newAccountName" />
+                    <button
+                        class="btn btn-primary"
+                        onclick='createAccount(document.getElementById("newAccountName").value)'
+                    >
+                        Create account
+                    </button>
+                    <br />
+                    <ul id="accounts"></ul>
+                </div>
             </div>
             <div class="col-sm-6">
                 <div name="accountDetails">
@@ -39,11 +49,12 @@
                     <p id="detailedBalance"></p>
                     <ul id="detailedTransactionHistory"></ul>
                 </div>
-                <form name="transaction" action="/transaction/" method="POST">
+                <div name="transaction">
                     <h3>Transfor</h3>
                     <label>Sending account</label><br />
                     <select id="accountSelect"></select>
                     <button
+                        class="btn btn-primary"
                         onclick='fillAccountSelect(document.getElementById("accountSelect"))'
                     >
                         Refresh select</button
@@ -53,26 +64,33 @@
                     <label>Amount</label><br />
                     <input id="transactionAmount" /><br />
                     <button
+                        class="btn btn-primary"
                         onclick='transforCredits(document.getElementById("accountSelect").value, document.getElementById("targetAccount").value, document.getElementById("transactionAmount").value)'
                     >
                         Transfor credits
                     </button>
-                </form>
+                </div>
             </div>
         </div>
 
         <script>
             var userID;
+            var selectedAccount = null;
 
             function logIn() {
                 userID = document.getElementById("userIDInput").value;
+                fillUserDetails(
+                    document.getElementById("detailedUserID"),
+                    document.getElementById("detailedUserUsername"),
+                    document.getElementById("detailedUserFirstname"),
+                    document.getElementById("detailedUserLastname")
+                );
                 fillAccountList();
             }
 
-            //den nyeste account kommer ikke med når man køre functionen
-            function createAccount(accountName) {
+            async function createAccount(accountName) {
                 var account = { name: accountName, ownerid: userID };
-                jsonRequest("/api/account/", "POST", account, "JSON");
+                await jsonRequest("/api/account/", "POST", account, "JSON");
                 fillAccountList();
             }
 
@@ -105,7 +123,6 @@
 
             async function fillAccountList() {
                 var accounts = await getAccounts();
-                console.log(accounts);
                 var accountsList = document.createElement("ul");
                 accountsList.classList.add("list-group");
                 if (accounts) {
@@ -113,27 +130,24 @@
                         var item = document.createElement("li");
                         item.classList.add("list-group-item");
                         var div = document.createElement("div");
-                        div.appendChild(
-                            document.createTextNode(
-                                "Account ID: " + accounts[i].id
-                            )
-                        );
-                        div.appendChild(document.createElement("br"));
-                        div.appendChild(
-                            document.createTextNode(
-                                "Account name: " + accounts[i].name
-                            )
-                        );
-                        div.appendChild(document.createElement("br"));
-                        div.appendChild(
-                            document.createTextNode(
-                                "Balance: " + accounts[i].balance
-                            )
-                        );
-                        //need to add a way to get info out after creation
+
+                        var aidp = document.createElement("p");
+                        aidp.innerHTML = "Account ID: " + accounts[i].id;
+                        div.appendChild(aidp);
+
+                        var anp = document.createElement("p");
+                        anp.innerHTML = "Account name: " + accounts[i].name;
+                        div.appendChild(anp);
+
+                        var abp = document.createElement("p");
+                        abp.innerHTML =
+                            "Account balance: " + accounts[i].balance;
+                        div.appendChild(abp);
+
                         item.appendChild(div);
+                        item.id = accounts[i].id;
                         item.onclick = function () {
-                            showAccountDetails(accounts[i].id);
+                            showAccountDetails(this.id);
                         };
                         accountsList.appendChild(item);
                     }
@@ -143,16 +157,94 @@
             }
 
             async function showAccountDetails(accountID) {
-                /*
+                if (selectedAccount != null) {
+                    selectedAccount.classList = "";
+                    selectedAccount.classList.add("list-group-item");
+                }
+                selectedAccount = document.getElementById(accountID);
+                selectedAccount.classList.add("active");
+
+                var account = await jsonRequest(
+                    "/api/account/" + accountID,
+                    "GET"
+                );
+
                 document.getElementById("detailedAccountName").innerHTML =
-                    accountName;
+                    "Account name: " + account.name;
                 document.getElementById("detailedBalance").innerHTML =
-                    accountBalance;
-                */
+                    "Balance: " + account.balance;
+
                 var res = await jsonRequest(
                     "/api/transaction-histories/" + accountID
                 );
-                console.log(res);
+
+                var transactionList = document.createElement("ul");
+                transactionList.classList.add("list-group");
+
+                if (res.transactionhistories) {
+                    for (var i = 0; i < res.transactionhistories.length; i++) {
+                        if (res.transactionhistories[i].type == 0) {
+                            var item = document.createElement("li");
+                            item.classList.add("list-group-item");
+                            var div = document.createElement("div");
+                            var tidp = document.createElement("p");
+                            tidp.innerHTML =
+                                "Transaction ID: " +
+                                res.transactionhistories[i].transaction.id;
+                            div.appendChild(tidp);
+
+                            var tsaidp = document.createElement("p");
+                            tsaidp.innerHTML =
+                                "Sender account ID: " +
+                                res.transactionhistories[i].transaction
+                                    .senderaccountid;
+                            div.appendChild(tsaidp);
+
+                            var traidp = document.createElement("p");
+                            traidp.innerHTML =
+                                "Receiver account ID: " +
+                                res.transactionhistories[i].transaction
+                                    .receiveraccountid;
+                            div.appendChild(traidp);
+
+                            var tcap = document.createElement("p");
+                            tcap.innerHTML =
+                                "Credit amount: " +
+                                res.transactionhistories[i].transaction.amount;
+                            div.appendChild(tcap);
+
+                            var tsp = document.createElement("p");
+                            if (res.transactionhistories[i].status == "1") {
+                                tsp.innerHTML = "Status: complete";
+                                //tsp.classList.add("text-success");
+                                div.classList.add("alert");
+                                div.classList.add("alert-success");
+                            } else if (
+                                res.transactionhistories[i].status == "2"
+                            ) {
+                                tsp.innerHTML = "Status: failed";
+                                //tsp.classList.add("text-danger");
+                                div.classList.add("alert");
+                                div.classList.add("alert-danger");
+                            } else {
+                                tsp.innerHTML = "Status: pending";
+                                //tsp.classList.add("text-warning");
+                                div.classList.add("alert");
+                                div.classList.add("alert-warning");
+                            }
+                            div.appendChild(tsp);
+
+                            item.appendChild(div);
+                            transactionList.appendChild(item);
+                        }
+                    }
+                }
+                var transactionListElement = document.getElementById(
+                    "detailedTransactionHistory"
+                );
+
+                transactionListElement.innerHTML = "";
+                transactionListElement.appendChild(transactionList);
             }
 
             async function fillAccountSelect(select) {
@@ -179,6 +271,19 @@
                     amount: Number(creditAmount),
                 };
                 jsonRequest("/api/transaction/", "POST", data, "JSON");
+            }
+
+            async function fillUserDetails(
+                idElement,
+                usernameElement,
+                firstnameElement,
+                lastnameElement
+            ) {
+                var res = await jsonRequest("/api/user/" + userID, "GET");
+                idElement.innerHTML = "User ID: " + userID;
+                usernameElement.innerHTML = "Username: " + res.username;
+                firstnameElement.innerHTML = "First name: " + res.firstname;
+                lastnameElement.innerHTML = "Last name: " + res.lastname;
             }
         </script>
     </body>
