@@ -23,10 +23,40 @@
             <div class="col-sm-6" name="accounts">
                 <div name="userDetails">
                     <h3>User details</h3>
-                    <p id="detailedUserID"></p>
-                    <p id="detailedUserUsername"></p>
-                    <p id="detailedUserFirstname"></p>
-                    <p id="detailedUserLastname"></p>
+                    <div>
+                        <div class="row">
+                            <div class="col-sm-4">
+                                <label>User ID:</label>
+                            </div>
+                            <div class="col-sm-8">
+                                <p id="detailedUserID"></p>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-sm-4">
+                                <label>Username:</label>
+                            </div>
+                            <div class="col-sm-8">
+                                <p id="detailedUserUsername"></p>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-sm-4">
+                                <label>First name:</label>
+                            </div>
+                            <div class="col-sm-8">
+                                <p id="detailedUserFirstname"></p>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-sm-4">
+                                <label>Last name:</label>
+                            </div>
+                            <div class="col-sm-8">
+                                <p id="detailedUserLastname"></p>
+                            </div>
+                        </div>
+                    </div>
                 </div>
                 <div name="userAccounts">
                     <h3>Accounts</h3>
@@ -45,8 +75,23 @@
             <div class="col-sm-6">
                 <div name="accountDetails">
                     <h3>Account details</h3>
-                    <p id="detailedAccountName"></p>
-                    <p id="detailedBalance"></p>
+                    <div class="row">
+                        <div class="col-sm-4">
+                            <label>Account name:</label>
+                        </div>
+                        <div class="col-sm-8">
+                            <p id="detailedAccountName"></p>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-sm-4">
+                            <label>Balance:</label>
+                        </div>
+                        <div class="col-sm-8">
+                            <p id="detailedBalance"></p>
+                        </div>
+                    </div>
+
                     <ul id="detailedTransactionHistory"></ul>
                 </div>
                 <div name="transaction">
@@ -154,6 +199,7 @@
                 }
                 document.getElementById("accounts").innerHTML = "";
                 document.getElementById("accounts").appendChild(accountsList);
+                fillAccountSelect(document.getElementById("accountSelect"));
             }
 
             async function showAccountDetails(accountID) {
@@ -216,19 +262,16 @@
                             var tsp = document.createElement("p");
                             if (res.transactionhistories[i].status == "1") {
                                 tsp.innerHTML = "Status: complete";
-                                //tsp.classList.add("text-success");
                                 div.classList.add("alert");
                                 div.classList.add("alert-success");
                             } else if (
                                 res.transactionhistories[i].status == "2"
                             ) {
                                 tsp.innerHTML = "Status: failed";
-                                //tsp.classList.add("text-danger");
                                 div.classList.add("alert");
                                 div.classList.add("alert-danger");
                             } else {
                                 tsp.innerHTML = "Status: pending";
-                                //tsp.classList.add("text-warning");
                                 div.classList.add("alert");
                                 div.classList.add("alert-warning");
                             }

@@ -57,7 +57,7 @@
                     </div>
                 </div>
                 <div class="col-sm-4" name="detailedUser">
-                    <h3>User info</h3>
+                    <h3>User details</h3>
                     <label>User ID</label>
                     <input id="detailedUserUserIDInput" />
                     <button
@@ -96,7 +96,6 @@
                         <ul id="detailedUserAccounts"></ul>
                     </div>
                 </div>
-                <!--Remember force accounts error checking input box-->
                 <div class="col-sm-4" name="correction">
                     <div>
                         <h3>Corrupt balance</h3>
@@ -261,13 +260,13 @@
                 });
             }
 
-            function createUser(username, firstname, lastname) {
+            async function createUser(username, firstname, lastname) {
                 var user = {
                     username: username,
                     firstname: firstname,
                     lastname: lastname,
                 };
-                jsonRequest("/api/user/", "POST", user, "JSON");
+                await jsonRequest("/api/user/", "POST", user, "JSON");
                 fillUserList();
             }
 
@@ -314,13 +313,16 @@
                         var tsp = document.createElement("p");
                         if (res.transactionhistories[i].status == "1") {
                             tsp.innerHTML = "Status: complete";
-                            tsp.classList.add("text-success");
+                            div.classList.add("alert");
+                            div.classList.add("alert-success");
                         } else if (res.transactionhistories[i].status == "2") {
                             tsp.innerHTML = "Status: failed";
-                            tsp.classList.add("text-danger");
+                            div.classList.add("alert");
+                            div.classList.add("alert-danger");
                         } else {
                             tsp.innerHTML = "Status: pending";
-                            tsp.classList.add("text-warning");
+                            div.classList.add("alert");
+                            div.classList.add("alert-warning");
                         }
                         div.appendChild(tsp);
 
