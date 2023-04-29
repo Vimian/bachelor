@@ -113,6 +113,12 @@ services:
         - service_path=cmd/transaction-orchestrator
     depends_on:
       - transaction-queue
+    #deploy:
+    #  mode: replicated
+    #  replicas: 1
+    #  resources:
+    #    limits:
+    #      cpus: "0.02"
 
   transaction-orchestrator-cache:
     image: redis:7.0.10
