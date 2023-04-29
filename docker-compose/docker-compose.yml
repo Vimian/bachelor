@@ -182,7 +182,7 @@ services:
       - account
       - transaction-history
       - transaction
-      #  - failure-finder-manager
+      - failure-finder-manager
       - frontend
 
   frontend:
