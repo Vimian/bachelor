@@ -1,0 +1,8 @@
+# Ignore all files and folders by default
+*
+# Allow go.mod and go.sum
+!go.mod
+!go.sum
+# Allow source code
+!cmd/
+!pkg/

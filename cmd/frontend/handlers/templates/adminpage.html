@@ -1,0 +1,404 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <link
+            href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/css/bootstrap.min.css"
+            rel="stylesheet"
+            integrity="sha384-KK94CHFLLe+nY2dmCWGMq91rCGa5gtU4mk92HdvYe+M/SXH301p5ILy+dN9+nJOZ"
+            crossorigin="anonymous"
+        />
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.4/jquery.min.js"></script>
+        <script
+            src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/js/bootstrap.bundle.min.js"
+            integrity="sha384-ENjdO4Dr2bkBIFxQpeoTz1HIcje39Wm4jDKdf19U8gI4ddQ3GYNS7NTKfAdVQSZe"
+            crossorigin="anonymous"
+        ></script>
+        <title>Admin Page</title>
+    </head>
+    <body>
+        <div class="container">
+            <div class="row">
+                <div class="col-sm-4">
+                    <div name="createUser">
+                        <h3>Create user</h3>
+                        <label>Username</label><br />
+                        <input id="createUserUsername" /><br />
+                        <label>First name</label><br />
+                        <input id="createUserFirstname" /><br />
+                        <label>Last name</label><br />
+                        <input id="createUserLastname" /><br />
+                        <button
+                            class="btn btn-primary"
+                            onclick='createUser(document.getElementById("createUserUsername").value,
+                        document.getElementById("createUserFirstname").value,
+                        document.getElementById("createUserLastname").value)'
+                        >
+                            Create
+                        </button>
+                    </div>
+                    <div name="users">
+                        <h3>User list</h3>
+                        <button
+                            class="btn btn-primary"
+                            onclick="fillUserList()"
+                        >
+                            Refresh user list
+                        </button>
+                        <ul class="list-group" id="userList"></ul>
+                        <button
+                            class="btn btn-primary"
+                            onclick="changePage(-1)"
+                        >
+                            Previous page
+                        </button>
+                        <label id="pageNr">Page: 0</label>
+                        <button class="btn btn-primary" onclick="changePage(1)">
+                            Next Page
+                        </button>
+                    </div>
+                </div>
+                <div class="col-sm-4" name="detailedUser">
+                    <h3>User details</h3>
+                    <label>User ID</label>
+                    <input id="detailedUserUserIDInput" />
+                    <button
+                        class="btn btn-primary"
+                        onclick='findUser(document.getElementById("detailedUserUserIDInput").value)'
+                    >
+                        Look up
+                    </button>
+                    <button
+                        class="btn btn-primary"
+                        onclick='copyUserID(document.getElementById("detailedUserUserIDInput").value)'
+                    >
+                        Copy
+                    </button>
+                    <br />
+                    <div>
+                        <div class="row">
+                            <div class="col-sm-4">
+                                <label>Username:</label>
+                            </div>
+                            <div class="col-sm-8">
+                                <p id="detailedUserUsername"></p>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-sm-4">
+                                <label>First name:</label>
+                            </div>
+                            <div class="col-sm-8">
+                                <p id="detailedUserFirstname"></p>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-sm-4">
+                                <label>Last name:</label>
+                            </div>
+                            <div class="col-sm-8">
+                                <p id="detailedUserLastname"></p>
+                            </div>
+                        </div>
+
+                        <label>Accounts</label>
+                        <ul class="list-group" id="detailedUserAccounts"></ul>
+                    </div>
+                </div>
+                <div class="col-sm-4" name="correction">
+                    <div>
+                        <h3>Corrupt balance</h3>
+                        <label>Amount</label><br />
+                        <input id="corruptBalanceAmount" /><br />
+                        <label>Account ID</label><br />
+                        <input id="corruptBalanceAccountID" /><br />
+                        <button
+                            class="btn btn-primary"
+                            onclick='corruptBalnce(document.getElementById("corruptBalanceAmount").value, document.getElementById("corruptBalanceAccountID").value)'
+                        >
+                            Corrupt
+                        </button>
+                    </div>
+                    <div>
+                        <h3>Correction transactions</h3>
+                        <button
+                            class="btn btn-primary"
+                            id="refreshCorrectionTransactions"
+                            onclick='getCorrectionTransactions(document.getElementById("correctionTransactionsList"))'
+                        >
+                            Refresh
+                        </button>
+                        <ul class="list-group" id="correctionTransactionsList">
+                            <li>Refresh to see corrections</li>
+                        </ul>
+                        <input id="forceCheckAccountID" />
+                        <button
+                            class="btn btn-primary"
+                            onclick='forceCheckAccount(document.getElementById("forceCheckAccountID").value)'
+                        >
+                            Check account</button
+                        ><br />
+                        <button
+                            class="btn btn-primary"
+                            onclick="forceCheckAllAccounts()"
+                        >
+                            Force check all accounts
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div name="errorDisplay" class="col text-center">
+            <h3>Error display</h3>
+            <p id="errorDisplay"></p>
+        </div>
+
+        <script>
+            var page = 0;
+            var selectedUser = null;
+
+            async function fillUserList() {
+                var res = await jsonRequest("/api/users/" + page, "GET");
+
+                if (res.error) {
+                    document.getElementById("errorDisplay").innerHTML =
+                        res.error;
+                    return;
+                }
+
+                var list = document.getElementById("userList");
+                list.innerHTML = "";
+
+                if (res.users) {
+                    for (var i = 0; i < res.users.length; i++) {
+                        var item = document.createElement("li");
+                        item.classList.add("list-group-item");
+
+                        var unp = document.createElement("p");
+                        unp.innerHTML = "Username: " + res.users[i].username;
+                        item.appendChild(unp);
+
+                        var uidp = document.createElement("p");
+                        uidp.innerHTML = "ID: " + res.users[i].id;
+                        item.appendChild(uidp);
+
+                        item.id = res.users[i].id;
+                        item.onclick = function () {
+                            showUserDetails(this.id);
+                        };
+
+                        list.appendChild(item);
+                    }
+                }
+            }
+
+            function showUserDetails(userID) {
+                if (selectedUser != null) {
+                    selectedUser.classList = "";
+                    selectedUser.classList.add("list-group-item");
+                }
+                selectedUser = document.getElementById(userID);
+                selectedUser.classList.add("active");
+
+                document.getElementById("detailedUserUserIDInput").value =
+                    userID;
+
+                findUser(userID);
+            }
+
+            function copyUserID(userID) {
+                navigator.clipboard.writeText(userID);
+            }
+
+            function changePage(number) {
+                page = page + number;
+                fillUserList();
+                document.getElementById("pageNr").innerHTML = "Page: " + page;
+            }
+
+            async function findUser(userID) {
+                var res = await jsonRequest("/api/user/" + userID, "GET");
+
+                if (res.error) {
+                    document.getElementById("errorDisplay").innerHTML =
+                        res.error;
+                } else {
+                    document.getElementById("detailedUserUsername").innerHTML =
+                        res.username;
+                    document.getElementById("detailedUserFirstname").innerHTML =
+                        res.firstname;
+                    document.getElementById("detailedUserLastname").innerHTML =
+                        res.lastname;
+                    var accountsRes = await jsonRequest(
+                        "/api/accounts/" + userID,
+                        "GET"
+                    );
+                    var accountsList = document.getElementById(
+                        "detailedUserAccounts"
+                    );
+                    accountsList.innerHTML = "";
+                    if (accountsRes.accounts) {
+                        for (var i = 0; i < accountsRes.accounts.length; i++) {
+                            var item = document.createElement("li");
+                            item.classList.add("list-group-item");
+
+                            var aidp = document.createElement("p");
+                            aidp.innerHTML =
+                                "Account ID: " + accountsRes.accounts[i].id;
+                            item.appendChild(aidp);
+
+                            var anp = document.createElement("p");
+                            anp.innerHTML =
+                                "Account name: " + accountsRes.accounts[i].name;
+                            item.appendChild(anp);
+
+                            var abp = document.createElement("p");
+                            abp.innerHTML =
+                                "Account balance: " +
+                                accountsRes.accounts[i].balance;
+                            item.appendChild(abp);
+
+                            item.id = accountsRes.accounts[i].id;
+                            item.onclick = function () {
+                                loadCorruptBalanceRequest(this.id);
+                            };
+
+                            accountsList.appendChild(item);
+                        }
+                    }
+                }
+            }
+
+            function loadCorruptBalanceRequest(accountID) {
+                document.getElementById("corruptBalanceAccountID").value =
+                    accountID;
+                document.getElementById("forceCheckAccountID").value =
+                    accountID;
+            }
+
+            ///api/user/, "POST", (JSON OBJECT), "JSON"
+            function jsonRequest(url, type, data, dataType) {
+                var res = $.ajax({
+                    url: url,
+                    type: type,
+                    data: JSON.stringify(data),
+                    dataType: dataType,
+                    success: function (result) {
+                        return result;
+                    },
+                    error: function (error) {
+                        return error;
+                    },
+                });
+
+                return res.catch((error) => {
+                    return error.responseJSON;
+                });
+            }
+
+            async function createUser(username, firstname, lastname) {
+                var user = {
+                    username: username,
+                    firstname: firstname,
+                    lastname: lastname,
+                };
+                await jsonRequest("/api/user/", "POST", user, "JSON");
+                fillUserList();
+            }
+
+            async function getCorrectionTransactions(list) {
+                var res = await jsonRequest(
+                    "/api/transaction-histories/00000000-0000-0000-0000-000000000001",
+                    "GET"
+                );
+
+                list.innerHTML = "";
+
+                if (res.transactionhistories) {
+                    for (var i = 0; i < res.transactionhistories.length; i++) {
+                        var item = document.createElement("li");
+                        item.classList.add("list-group-item");
+
+                        var tidp = document.createElement("p");
+                        tidp.innerHTML =
+                            "Transaction ID: " +
+                            res.transactionhistories[i].transaction.id;
+                        item.appendChild(tidp);
+
+                        var tsaidp = document.createElement("p");
+                        tsaidp.innerHTML =
+                            "Sender account ID: " +
+                            res.transactionhistories[i].transaction
+                                .senderaccountid;
+                        item.appendChild(tsaidp);
+
+                        var traidp = document.createElement("p");
+                        traidp.innerHTML =
+                            "Receiver account ID: " +
+                            res.transactionhistories[i].transaction
+                                .receiveraccountid;
+                        item.appendChild(traidp);
+
+                        var tcap = document.createElement("p");
+                        tcap.innerHTML =
+                            "Credit amount: " +
+                            res.transactionhistories[i].transaction.amount;
+                        item.appendChild(tcap);
+
+                        var tsp = document.createElement("p");
+                        if (res.transactionhistories[i].status == "1") {
+                            tsp.innerHTML = "Status: complete";
+                            item.classList.add("bg-success");
+                            item.classList.add("text-white");
+                        } else if (res.transactionhistories[i].status == "2") {
+                            tsp.innerHTML = "Status: failed";
+                            item.classList.add("bg-danger");
+                            item.classList.add("text-white");
+                        } else {
+                            tsp.innerHTML = "Status: pending";
+                            item.classList.add("bg-warning");
+                            item.classList.add("text-dark");
+                        }
+                        item.appendChild(tsp);
+
+                        list.appendChild(item);
+                    }
+                }
+            }
+
+            //Remember to look at this later
+            function corruptBalnce(amount, accountID) {
+                var data = {
+                    balancechange: Number(amount),
+                    transactiontype: 1,
+                };
+                jsonRequest(
+                    "/api/account/" + accountID + "/balance/",
+                    "PUT",
+                    data,
+                    "JSON"
+                );
+            }
+
+            function forceCheckAccount(accountID) {
+                jsonRequest(
+                    "/api/failure-finder-manager/account/" + accountID,
+                    "POST"
+                );
+            }
+
+            function forceCheckAllAccounts() {
+                jsonRequest("/api/failure-finder-manager/all/", "POST");
+            }
+        </script>
+        <script>
+            //init site
+            fillUserList();
+            getCorrectionTransactions(
+                document.getElementById("correctionTransactionsList")
+            );
+        </script>
+    </body>
+</html>

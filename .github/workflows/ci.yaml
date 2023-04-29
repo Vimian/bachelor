@@ -26,6 +26,7 @@ jobs:
           - transaction-orchestrator
           - failure-finder-manager
           - failure-finder
+          - frontend
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
