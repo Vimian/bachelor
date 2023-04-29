@@ -182,8 +182,20 @@ services:
       - account
       - transaction-history
       - transaction
-    #  - failure-finder-manager
-    #  - frontend
+      - failure-finder-manager
+      - frontend
+
+  frontend:
+    image: bachelor/frontend
+    restart: unless-stopped
+    build:
+      context: ${docker_compose_path_offset_to_root}
+      dockerfile: /cmd/frontend/Dockerfile
+      args:
+        - GO_VERSION=${go_version}
+        - service_path=cmd/frontend
+    #ports:
+    #  - "8080:8080"
 
 volumes:
   user_db_data:
