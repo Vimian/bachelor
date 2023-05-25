@@ -1,0 +1,87 @@
+@startuml
+left to right direction
+
+node Devices {
+    rectangle "Admin Client" as dac
+    rectangle "Web Client" as dwc
+    rectangle "Mobile Client" as dmc
+}
+
+interface "REST API" as efapi
+interface "REST API" as eagapi
+interface "REST API" as egapi
+
+node Environment {
+    rectangle "Frontend" as ef
+    rectangle "Admin Gateway" as eag
+    rectangle "Gateway" as eg
+    rectangle "Auth" as ea
+    rectangle "User" as eu
+    rectangle "External Bank Gateway" as eebg
+    rectangle "Transaction" as et
+    rectangle "Transaction History" as eth
+    rectangle "Account" as eac
+    rectangle "Scheduled Transaction" as est
+
+    interface "REST API" as eeaapi
+    interface "REST API" as eeuapi
+    interface "REST API" as eeebgapi
+    interface "REST API" as eetapi
+    interface "REST API" as eethapi
+    interface "REST API" as eeacapi
+    interface "REST API" as eestapi
+}
+
+database "Pages,\nStyles,\nScripts" as dpss
+database "Auth\nData" as dad
+database "User\nData" as dud
+database "Transaction\nLogs" as dtl
+database "Account\nData" as dacd
+database "Scheduled\nTransaction\nData" as dstd
+node "External\nBank" as eb
+interface "REST API" as ebgapi
+
+ebgapi )-- eb
+eebg -- ebgapi
+
+dac --( efapi
+dac --( eagapi
+
+dwc --( efapi
+dwc --( egapi
+
+dmc --( egapi
+
+efapi -- ef
+eagapi -- eag
+egapi -- eg
+
+eeaapi --- ea
+eeuapi --- eu
+eeebgapi -- eebg
+eetapi -- et
+eethapi -- eth
+eeacapi -- eac
+eestapi --- est
+
+eag ---( eeaapi
+eag ---( egapi
+eg ---( eeaapi
+eg ---( eeuapi
+eg --( eetapi
+eg --( eethapi
+eg ---( eeacapi
+eg ---( eestapi
+
+et --( eeebgapi
+et --( eethapi
+et --( eeacapi
+
+ef ------> dpss
+ea --> dad
+eu --> dud
+eth --> dtl
+eac --> dacd
+est --> dstd
+
+@enduml

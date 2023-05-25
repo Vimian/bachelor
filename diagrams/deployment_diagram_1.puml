@@ -1,0 +1,128 @@
+@startuml
+left to right direction
+
+node Devices {
+    rectangle "Admin Client" as dac #Pink
+    rectangle "Web Client" as dwc #PaleGoldenRod
+    rectangle "Mobile Client" as dmc #Pink
+}
+
+interface "REST API" as efapi
+interface "REST API" as eagapi
+interface "REST API" as egapi
+
+node Environment {
+    rectangle "Frontend" as ef #PaleGoldenRod
+    rectangle "Admin Gateway" as eag #Pink
+    rectangle "Gateway" as eg #PaleGoldenRod
+    rectangle "Auth" as ea #Pink
+    rectangle "User" as eu
+    rectangle "External Bank Gateway" as eebg #Pink
+    rectangle "Transaction" as et
+    queue "Transaction Queue" as etq
+    rectangle "Transaction Orchestrator" as eto
+    rectangle "Transaction History" as eth
+    rectangle "Account" as eac
+    rectangle "Scheduled Transaction" as est #Pink
+    rectangle "Message Broker" as embn #Pink
+    rectangle "Notification Manager" as enm #Pink
+    queue "Notification Queue" as enq #Pink
+    rectangle "Notification" as en #Pink
+    rectangle "Message Broker" as emba #Pink
+    rectangle "Failure Finder Manager" as effm
+    queue "Failure Finder Queue" as effmq
+    rectangle "Failure Finder" as eff
+
+    interface "REST API" as eeaapi
+    interface "REST API" as eeuapi
+    interface "REST API" as eeebgapi
+    interface "REST API" as eetapi
+    interface "REST API" as eethapi
+    interface "REST API" as eeacapi
+    interface "REST API" as eestapi
+    interface "REST API" as eeffmapi
+}
+
+database "Pages,\nStyles,\nScripts" as dpss #Pink
+database "Auth\nData" as dad #Pink
+database "User\nData" as dud
+database "Transaction\nLogs" as dtl
+database "Account\nData" as dacd
+database "Scheduled\nTransaction\nData" as dstd #Pink
+database "Failure\nFinder\nData" as dffd
+
+node "External\nBank" as eb #Pink
+interface "REST API" as ebgapi
+
+node "External\nNotification" as eno #Pink
+interface "REST API" as enapi
+
+eebg --> eb
+ebgapi )-- eb
+eebg -- ebgapi
+
+dac --( efapi
+dac --( eagapi
+
+dwc --( efapi
+dwc --( egapi
+
+dmc --( egapi
+
+efapi -- ef
+eagapi -- eag
+egapi -- eg
+
+eeaapi -- ea
+eeuapi -- eu
+eeebgapi -- eebg
+eetapi -- et
+eethapi -- eth
+eeacapi -- eac
+eestapi -- est
+eeffmapi -- effm
+enapi -- eno
+
+eag --( eeaapi
+eag --( egapi
+eg --( eeaapi
+eg --( eeuapi
+eg --( eetapi
+eg --( eethapi
+eg --( eeacapi
+eg --( eestapi
+eg --( eeffmapi
+
+eto ---( eeebgapi
+eto ---( eethapi
+eto ---( eeacapi
+eto ---> embn
+
+embn -> enm
+enm -> enq
+enq -> en
+en ---( enapi
+
+effm --( eeacapi
+effm <--- emba
+eff --( eetapi
+
+et -> etq
+etq -> eto
+
+effm -> effmq
+effmq -> eff
+
+eac -> emba
+
+est --( eetapi
+
+ef --> dpss
+dad <- ea
+eu --> dud
+eth --> dtl
+eac --> dacd
+est ---> dstd
+effm ----> dffd
+
+@enduml
